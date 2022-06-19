@@ -184,9 +184,18 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek){
 	api.get({action: 'parse',prop: 'wikitext', format: 'json', page:"ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header}).done(function(data){
 		var wikitext=getWiki(data,msgBox,header).replace(/(\=\=.+?=\=)/s, "$1\n{{بسته}}").replace("| هفته =","| هفته ="+amikWeek).replace("| سال =","| سال ="+amikYear)+"{{پایان بسته}}";
 		api.postWithEditToken({action: 'edit', title: "کاربر:Nightdevil/ر", text: wikitext, minor: true, summary: "test"}).done(function() {
+			currentBox.innerHTML += '<p>آمیک <b>'+header+'</b> به <a href="https://fa.wikipedia.org/wiki/ویکی‌پدیا:آیا می‌دانستید که...؟/'+amikYear.value+'/هفته '+amikWeek.value+'">الگوی هفتهٔ '+amikWeek.value+'</a> از سال '+amikYear.value+' افزوده شد.</p><p>تاریخچهٔ آمیک در <a href="https://fa.wikipedia.org/wiki/بحث:'+header+'">صفحهٔ بحث مقالهٔ '+header+'</a> ثبت شد.</p><p>صفحهٔ <a href="https://fa.wikipedia.org/wiki/ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/'+header+'">گفتگوی پیش&zwnj;نویس آمیک</a> بسته شد.</p>';
 			msgBox.setLabel("وظیفه با موفقیت انجام شد.");
 		}).fail(function() {msgBox.setLabel("خطا در دخیره الگوی جمع‌بندی بحث. عملیات ناموفق بود.");})
 	}).fail(function(){msgBox.setLabel("خطا در ارتباط با سرور");})
+}
+
+function test(){
+	var header ="سلام"
+	var amikYear = 2022
+	var amikWeek = 54
+	document.getElementsByClassName("infobox")[0].innerHTML += '<p>آمیک <b>'+header+'</b> به <a href="https://fa.wikipedia.org/wiki/ویکی‌پدیا:آیا می‌دانستید که...؟/'+amikYear+'/هفته '+amikWeek+'">الگوی هفتهٔ '+amikWeek+'</a> از سال '+amikYear+' افزوده شد.</p><p>تاریخچهٔ آمیک در <a href="https://fa.wikipedia.org/wiki/بحث:'+header+'">صفحهٔ بحث مقالهٔ '+header+'</a> ثبت شد.</p><p>صفحهٔ <a href="https://fa.wikipedia.org/wiki/ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/'+header+'">گفتگوی پیش&zwnj;نویس آمیک</a> بسته شد.</p>';
+
 }
 
 	function getWiki(data,msgBox,header) {
