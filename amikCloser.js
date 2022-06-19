@@ -165,7 +165,7 @@ function talkTemplate(header,amikText,amikYear,amikWeek,msgBox){
 			api.postWithEditToken({action: 'edit', title: "کاربر:Nightdevil/ر",text: wikitext,minor: true, summary: "test"
 				}).done(function(result) {
 				msgBox.setLabel("الگوی تاریخچه با موفقیت به بحث مقاله افزوده شد. در حال افزودن الگوی {{بسته}} آمیک به این گفتگو.")
-				closeSuccess();
+				closeSuccess(header, msgBox);
 				}).fail(function(){msgBox.setLabel("خطا در ذخیره کردن الگوی هفته. عملیات متوقف شد.")})
 		
 			}).fail(function(){
@@ -174,17 +174,21 @@ function talkTemplate(header,amikText,amikYear,amikWeek,msgBox){
 			api.postWithEditToken({action: 'edit', title: "کاربر:Nightdevil/ر",text: wikitext,minor: true, summary: "test"
 				}).done(function(result) {
 				msgBox.setLabel("صفجه بحث مقاله ساخته شد و الگوی تاریخچه با موفقیت به آن افزوده شد. در حال افزودن الگوی {{بسته}} آمیک به این گفتگو.")
-				closeSuccess();
+				closeSuccess(header, msgBox);
 				}).fail(function(error){msgBox.setLabel("خطا در ذخیره کردن الگوی هفته. عملیات متوقف شد.")})
 			})
 }
 
-function closeSuccess(){
+function closeSuccess(header, msgBox){
 	var api = new mw.Api();
-	api.get( {action: 'parse',prop: 'wikitext', format: 'json', page:"هنر"} ).done( function ( data ) {
-		var amikText = getWiki(data,msgBox,header);
-		
-	})
+	api.get({action: 'parse',prop: 'wikitext', format: 'json', page:"ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header}).done(function(data){
+		var wikitext=getWiki(data,msgBox,header).replace(/(\=\=.+?=\=)/s, "$1\n{{بسته}}")+"{{پایان بسته}}";
+		console.log(wikitext);
+		api.postWithEditToken({action: 'edit', title: "کاربر:Nightdevil/ر", text: wikitext, minor: true, summary: "test"}).done(function() {
+			
+		}).fail(function() {msgBox.setLabel("خطا در دخیره الگوی جمع‌بندی بحث. عملیات ناموفق بود.");})
+		msgBox.setLabel("success");
+	}).fail(function(){msgBox.setLabel("خطا در ارتباط با سرور");})
 }
 
 	function getWiki(data,msgBox,header) {
