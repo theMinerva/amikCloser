@@ -73,12 +73,9 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 							progress: false	
 						});
 						var currentBox = currentRow.parentElement.parentElement
-						currentBox.style = "padding-bottom:10px";
 						currentBox.innerHTML = "";
 						$(currentBox).append(progressBar.$element);
 						$(currentBox).append(msgBox.$element);
-						progressBar.$element[0].style = "margin:auto";
-						msgBox.$element[0].style = "margin:10px auto 0px; max-width:50em";
 						$.ajax({
 								url: "https://fa.wikipedia.org/w/api.php?action=parse&page=ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"&prop=wikitext&format=json",
 								success: function(data) {
@@ -131,7 +128,6 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 				});
 				$(currentRow)[0].textContent ="";
 				$(currentRow).append(jamBandiB.$element)
-				jamBandiB.$element[0].style = "margin:auto;width:150px";
 				
 				//نوار قالبش
 				$(currentRow).append('<tr><td colspan="2"><div style="display: flex; justify-content: center;"></div></td></tr><tr style="display:none;"><td colspan=2 style="padding-bottom:10px; text-align:center"><div style="display: flex; justify-content: center;"></div></td></tr>');
@@ -142,10 +138,8 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 						{data: "۲۰۲۲", label: "سال ۲۰۲۲"},
 						{data:"۲۰۲۳", label: "سال ۲۰۲۳"},
 						{data:"۲۰۲۴", label: "سال ۲۰۲۴"}
-					],indicator: 'required'
+					],indicator: 'required', align:'right'
 				});
-				amikYear.$element[0].style = "text-align:center;width:150px";
-				//hzLayoutT.addItems([amikYear]);
 				
 				//ورود هفته
 				var currentTime = new Date()
@@ -160,8 +154,11 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 				}
 				week(currentTime.getFullYear(), currentTime.getMonth() + 1, currentTime.getDate())
 				var amikWeek = new OO.ui.NumberInputWidget({
-					align: 'center',indicator: 'required',input: { value: week(currentTime.getFullYear(), currentTime.getMonth() + 1, currentTime.getDate())+1 },min: 1,max: 54});
-				amikWeek.$element[0].style = "width:150px";
+					align: 'left',
+					input: { value: week(currentTime.getFullYear(), currentTime.getMonth() + 1, currentTime.getDate())+1 },
+					min: 1,max: 53});
+				amikWeek.$input[0].style = "text-align:center; display: block; margin:auto";
+				amikWeek.$input[0].parentElement.style = "font-size:113.63%";
 
 				//دکمه اعمال
 				var doneB = new OO.ui.ButtonWidget( {
@@ -170,7 +167,6 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 					flags: ["primary", "progressive"],
 					title: "اعمال جمع‌بندی موفق"
 				});
-				doneB.$element[0].style = "margin:auto;width:150px";
 				doneB.on("click", function() {
 				OO.ui.confirm("آیا از جمع‌بندی موفقانهٔ این پیشنهاد ("+header+") اطمینان دارید؟").done(function(confirmed) {
 				if ( confirmed ) {
@@ -186,8 +182,6 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 					currentBox.innerHTML = "";
 					$(currentBox).append(progressBar.$element);
 					$(currentBox).append(msgBox.$element);
-					progressBar.$element[0].style = "margin:auto";
-					msgBox.$element[0].style = "margin:10px auto 0px; max-width:50em";
 					//
 					var amikWeek_ = amikWeek.value.replace(/1/g,"۱").replace(/2/g,"۲").replace(/3/g,"۳").replace(/4/g,"۴").replace(/5/g,"۵").replace(/6/g,"۶").replace(/7/g,"۷").replace(/8/g,"۸").replace(/9/g,"۹").replace(/0/g,"۰")
 					var amikWeekURL = "ویکی‌پدیا:آیا می‌دانستید که...؟/"+amikYear.value+"/هفته "+amikWeek_
@@ -268,17 +262,28 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 				jamBandiNo.on("click", function() {
 					execute(currentRow, header, jamReason);
 				});
-				jamReason.$element[0].style = "width:150px";
-				jamBandiNo.$element[0].style = "width:150px";
 
-				//ایجاد نوار افقی
-				var hzLayoutT = new OO.ui.FieldsetLayout( {label: 'مشخص کنید که آمیک در چه هفته از چه سالی در صفحهٔ اصلی نمایش یابد',helpInline: true,
-					help:"الان در هفتهٔ "+week(currentTime.getFullYear(), currentTime.getMonth() + 1, currentTime.getDate())+"م از سال"+currentTime.getFullYear()+" هستیم"} );
-				hzLayoutT.addItems([amikYear, amikWeek, doneB, jamReason, jamBandiNo]);
-
+				//ایجاد نوار 
+				var hzLayoutT = new OO.ui.FieldsetLayout( {label: '',helpInline: true,
+					help:"دلیل جمع‌بندی غیر موفق"
+					} );
+				var topLayout = new OO.ui.FieldsetLayout( {helpInline: true,
+					help:"مشخص کنید که آمیک در چه هفته از چه سالی در صفحهٔ اصلی نمایش یابد. الان در هفتهٔ "+toFa(week(currentTime.getFullYear(), currentTime.getMonth() + 1, currentTime.getDate()))+"م از سال "+toFa(currentTime.getFullYear())+" هستیم"
+				});
+				amikYear.$element.style = "width:50%";
+				topLayout.addItems([amikYear, amikWeek, doneB]);
+				hzLayoutT.addItems([jamReason, jamBandiNo]);
+				$(currentRow.children[2]).append(topLayout.$element);
 				$(currentRow.children[2]).append(hzLayoutT.$element);
+				topLayout.$element.style = "text-align:center; display: block; margin:auto";
+				
 				
 			}
+
+function toFa(foo){
+	return foo.toString().replace(/1/g,"۱").replace(/2/g,"۲").replace(/3/g,"۳").replace(/4/g,"۴").replace(/5/g,"۵").replace(/6/g,"۶").replace(/7/g,"۷").replace(/8/g,"۸").replace(/9/g,"۹").replace(/0/g,"۰")
+	
+}
 
 	if(document.title.slice(0,27) == 'ویکی‌پدیا:آیا می‌دانستید که' || document.title.slice(0,27) == 'کاربر:Nightdevil/صفحه تمرین'){
 			var amikBoxes = document.getElementsByClassName("infobox")
