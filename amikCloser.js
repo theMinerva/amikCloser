@@ -54,7 +54,6 @@
 				var amikWeek = new OO.ui.NumberInputWidget({
 					align: 'center',indicator: 'required',input: { value: week(currentTime.getFullYear(), currentTime.getMonth() + 1, currentTime.getDate())+1 },min: 1,max: 54});
 				amikWeek.$element[0].style = "width:150px";
-				//hzLayoutT.addItems([amikWeek]);
 
 				//دکمه اعمال
 				var doneB = new OO.ui.ButtonWidget( {
@@ -98,7 +97,7 @@
 									api.postWithEditToken({action: 'edit', title: pageName,text: wikitext,minor: true, summary: editSummary
 										}).done(function(result) {
 										msgBox.setLabel("الگوی هفته با موفقیت ذخیره شد. در حال افزودن الگوی {{تاریخچه مقاله}} آمیک به بحث مقاله.")
-										talkTemplate(header,amikText,amikYear,amikWeek,msgBox, currentBox)
+										talkTemplate(header,amikText,amikYear,amikWeek_,msgBox, currentBox, progressBar)
 										}).fail(function(){msgBox.setLabel("خطا در ذخیره کردن الگوی هفته. عملیات متوقف شد.")})
 								}else{
 									msgBox.setLabel("الگوی هفتهٔ انتخاب‌شده ("+amikWeekURL+")جای خالی ندارد. هفته‌ای دیگر را انتخاب کنید.");
@@ -126,7 +125,7 @@
 								api.postWithEditToken({action: 'edit', title: "کاربر:Nightdevil/پ",text: wikitext,minor: true, summary: "test"
 										}).done(function(result) {
 										msgBox.setLabel("الگوی هفته با موفقیت ایجاد شد. در حال افزودن الگوی {{تاریخچه مقاله}} آمیک به بحث مقاله.")
-										talkTemplate(header,amikText,amikYear,amikWeek,msgBox, currentBox)
+										talkTemplate(header,amikText,amikYear,amikWeek_,msgBox, currentBox, progressBar)
 										}).fail(function(){msgBox.setLabel("خطا در ذخیره کردن الگوی هفته. عملیات متوقف شد.")})
 								})
 								});
@@ -157,46 +156,42 @@
 				
 			}
 
-function talkTemplate(header,amikText,amikYear,amikWeek,msgBox, currentBox){
+function talkTemplate(header,amikText,amikYear,amikWeek_,msgBox, currentBox, progressBar){
 		var api = new mw.Api();
 			api.get( {action: 'parse',prop: 'wikitext', format: 'json', page: "بحث:"+header, section:0} ).done( function ( data ) {
 				//if there is a talk page
-			var wikitext = getWiki(data,msgBox,header)+"{{تاریخچه مقاله| dykdate = "+amikYear.value+"0100+"+amikWeek.value+"weeks| dykentry = "+amikText+"| dyklink = ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"}}";
+			var wikitext = getWiki(data,msgBox,header)+"{{تاریخچه مقاله| dykdate = "+amikYear.value+"0100+"+amikWeek_+"weeks| dykentry = "+amikText+"| dyklink = ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"}}";
 			api.postWithEditToken({action: 'edit', title: "کاربر:Nightdevil/ر",text: wikitext,minor: true, summary: "test"
 				}).done(function(result) {
 				msgBox.setLabel("الگوی تاریخچه با موفقیت به بحث مقاله افزوده شد. در حال افزودن الگوی {{بسته}} آمیک به این گفتگو.")
-				closeSuccess(header, msgBox, currentBox, amikYear, amikWeek);
+				closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressBar);
 				}).fail(function(){msgBox.setLabel("خطا در ذخیره کردن الگوی هفته. عملیات متوقف شد.")})
 		
 			}).fail(function(){
 			//if there is no talk page
-			var wikitext = "{{رتب}}{{بصب}}{{تاریخچه مقاله| dykdate = "+amikYear.value+"0100+"+amikWeek.value+"weeks| dykentry = "+amikText+"| dyklink = ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"}}";
+			var wikitext = "{{رتب}}{{بصب}}{{تاریخچه مقاله| dykdate = "+amikYear.value+"0100+"+amikWeek_+"weeks| dykentry = "+amikText+"| dyklink = ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"}}";
 			api.postWithEditToken({action: 'edit', title: "کاربر:Nightdevil/ر",text: wikitext,minor: true, summary: "test"
 				}).done(function(result) {
 				msgBox.setLabel("صفجه بحث مقاله ساخته شد و الگوی تاریخچه با موفقیت به آن افزوده شد. در حال افزودن الگوی {{بسته}} آمیک به این گفتگو.")
-				closeSuccess(header, msgBox, currentBox, amikYear, amikWeek);
+				closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressBar);
 				}).fail(function(error){msgBox.setLabel("خطا در ذخیره کردن الگوی هفته. عملیات متوقف شد.")})
 			})
 }
 
-function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek){
+function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressBar){
 	var api = new mw.Api();
 	api.get({action: 'parse',prop: 'wikitext', format: 'json', page:"ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header}).done(function(data){
-		var wikitext=getWiki(data,msgBox,header).replace(/(\=\=.+?=\=)/s, "$1\n{{بسته}}").replace("| هفته =","| هفته ="+amikWeek).replace("| سال =","| سال ="+amikYear)+"{{پایان بسته}}";
+		var wikitext=getWiki(data,msgBox,header).replace(/(\=\=.+?=\=)/s, "$1\n{{بسته}}").replace("| هفته =","| هفته ="+amikWeek_).replace("| سال =","| سال ="+amikYear.value)+"{{پایان بسته}}";
 		api.postWithEditToken({action: 'edit', title: "کاربر:Nightdevil/ر", text: wikitext, minor: true, summary: "test"}).done(function() {
-			currentBox.innerHTML += '<p>آمیک <b>'+header+'</b> به <a href="https://fa.wikipedia.org/wiki/ویکی‌پدیا:آیا می‌دانستید که...؟/'+amikYear.value+'/هفته '+amikWeek.value+'">الگوی هفتهٔ '+amikWeek.value+'</a> از سال '+amikYear.value+' افزوده شد.</p><p>تاریخچهٔ آمیک در <a href="https://fa.wikipedia.org/wiki/بحث:'+header+'">صفحهٔ بحث مقالهٔ '+header+'</a> ثبت شد.</p><p>صفحهٔ <a href="https://fa.wikipedia.org/wiki/ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/'+header+'">گفتگوی پیش&zwnj;نویس آمیک</a> بسته شد.</p>';
 			msgBox.setLabel("وظیفه با موفقیت انجام شد.");
+			msgBox.setIcon("check");
+			msgBox.setType("success");
+			progressBar.$element.remove();
+			currentBox.innerHTML += '<p>آمیک <b>'+header+'</b> به <a href="https://fa.wikipedia.org/wiki/ویکی‌پدیا:آیا می‌دانستید که...؟/'+amikYear.value+'/هفته '+amikWeek_+'">الگوی هفتهٔ '+amikWeek_+'</a> از سال '+amikYear.value+' افزوده شد.</p><p>تاریخچهٔ آمیک در <a href="https://fa.wikipedia.org/wiki/بحث:'+header+'">صفحهٔ بحث مقالهٔ '+header+'</a> ثبت شد.</p><p>صفحهٔ <a href="https://fa.wikipedia.org/wiki/ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/'+header+'">گفتگوی پیش&zwnj;نویس آمیک</a> بسته شد.</p>';
 		}).fail(function() {msgBox.setLabel("خطا در دخیره الگوی جمع‌بندی بحث. عملیات ناموفق بود.");})
 	}).fail(function(){msgBox.setLabel("خطا در ارتباط با سرور");})
 }
 
-function test(){
-	var header ="سلام"
-	var amikYear = 2022
-	var amikWeek = 54
-	document.getElementsByClassName("infobox")[0].innerHTML += '<p>آمیک <b>'+header+'</b> به <a href="https://fa.wikipedia.org/wiki/ویکی‌پدیا:آیا می‌دانستید که...؟/'+amikYear+'/هفته '+amikWeek+'">الگوی هفتهٔ '+amikWeek+'</a> از سال '+amikYear+' افزوده شد.</p><p>تاریخچهٔ آمیک در <a href="https://fa.wikipedia.org/wiki/بحث:'+header+'">صفحهٔ بحث مقالهٔ '+header+'</a> ثبت شد.</p><p>صفحهٔ <a href="https://fa.wikipedia.org/wiki/ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/'+header+'">گفتگوی پیش&zwnj;نویس آمیک</a> بسته شد.</p>';
-
-}
 
 	function getWiki(data,msgBox,header) {
 				try{
