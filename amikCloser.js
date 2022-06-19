@@ -1,3 +1,111 @@
+function talkTemplate(header,amikText,amikYear,amikWeek_,msgBox, currentBox, progressBar){
+		var api = new mw.Api();
+			api.get( {action: 'parse',prop: 'wikitext', format: 'json', page: "بحث:"+header, section:0} ).done( function ( data ) {
+				//if there is a talk page
+			var wikitext = getWiki(data,msgBox,header)+"{{تاریخچه مقاله| dykdate = "+amikYear.value+"0100+"+amikWeek_+"weeks| dykentry = "+amikText+"| dyklink = ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"}}";
+			api.postWithEditToken({action: 'edit', title: "کاربر:Nightdevil/ر",text: wikitext,minor: true, summary: "test"
+				}).done(function(result) {
+				msgBox.setLabel("الگوی تاریخچه با موفقیت به بحث مقاله افزوده شد. در حال افزودن الگوی {{بسته}} آمیک به این گفتگو.")
+				closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressBar);
+				}).fail(function(){msgBox.setLabel("خطا در ذخیره کردن الگوی هفته. عملیات متوقف شد.")})
+		
+			}).fail(function(){
+			//if there is no talk page
+			var wikitext = "{{رتب}}{{بصب}}{{تاریخچه مقاله| dykdate = "+amikYear.value+"0100+"+amikWeek_+"weeks| dykentry = "+amikText+"| dyklink = ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"}}";
+			api.postWithEditToken({action: 'edit', title: "کاربر:Nightdevil/ر",text: wikitext,minor: true, summary: "test"
+				}).done(function(result) {
+				msgBox.setLabel("صفجه بحث مقاله ساخته شد و الگوی تاریخچه با موفقیت به آن افزوده شد. در حال افزودن الگوی {{بسته}} آمیک به این گفتگو.")
+				closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressBar);
+				}).fail(function(error){msgBox.setLabel("خطا در ذخیره کردن الگوی هفته. عملیات متوقف شد.")})
+			})
+}
+
+function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressBar){
+	var api = new mw.Api();
+	api.get({action: 'parse',prop: 'wikitext', format: 'json', page:"ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header}).done(function(data){
+		var wikitext=getWiki(data,msgBox,header).replace(/(\=\=.+?=\=)/s, "$1\n{{بسته}}").replace("| هفته =","| هفته ="+amikWeek_).replace("| سال =","| سال ="+amikYear.value)+"{{پایان بسته}}";
+		api.postWithEditToken({action: 'edit', title: "کاربر:Nightdevil/ر", text: wikitext, minor: true, summary: "test"}).done(function() {
+			msgBox.setLabel("وظیفه با موفقیت انجام شد.");
+			msgBox.setIcon("check");
+			msgBox.setType("success");
+			progressBar.$element.remove();
+			currentBox.innerHTML += '<p>آمیک <b>'+header+'</b> به <a href="https://fa.wikipedia.org/wiki/ویکی‌پدیا:آیا می‌دانستید که...؟/'+amikYear.value+'/هفته '+amikWeek_+'">الگوی هفتهٔ '+amikWeek_+'</a> از سال '+amikYear.value+' افزوده شد.</p><p>تاریخچهٔ آمیک در <a href="https://fa.wikipedia.org/wiki/بحث:'+header+'">صفحهٔ بحث مقالهٔ '+header+'</a> ثبت شد.</p><p>صفحهٔ <a href="https://fa.wikipedia.org/wiki/ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/'+header+'">گفتگوی پیش&zwnj;نویس آمیک</a> بسته شد.</p>';
+		}).fail(function() {msgBox.setLabel("خطا در دخیره الگوی جمع‌بندی بحث. عملیات ناموفق بود.");})
+	}).fail(function(){msgBox.setLabel("خطا در ارتباط با سرور");})
+}
+
+	function getWiki(data,msgBox,header) {
+				try{
+					let pages = data.parse.wikitext;
+					let firstKey = Object.keys(pages);
+					return pages[firstKey];
+				}
+				catch(e){
+					msgBox.setLabel("خطا در خواندن [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"]]. ممکن است عنوان آمیک پیشنهادی در صفحه پیش‌نویس اشتباه وارد شده باشد و باید دستی جمع‌بندی شود.")
+				}
+			}
+
+	function postEdit(wikitext, editSummary, pageName, secIdx) {
+				var api = new mw.Api();
+				api.postWithEditToken({
+					action: 'edit',
+					title: pageName,
+					text: wikitext,
+					section: secIdx,
+					minor: true,
+					summary: editSummary
+				}).done(function(result) {
+					window.location = "/w/index.php?title=" + pageName + "&type=revision&diff=cur&oldid=prev";
+				});
+			}
+
+	function execute(currentRow, header, jamReason){
+				mw.util.addCSS('.oo-ui-window-frame { width: 700px!important; }');
+				OO.ui.confirm("آیا از جمع‌بندی ناموفق این پیشنهاد ("+header+") اطمینان دارید؟ \n دلیل: "+ jamReason.value).done(function(confirmed) {
+					if ( confirmed ) {
+			//			console.log( "https://fa.wikipedia.org/w/api.php?action=parse&page={{ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"}}&prop=wikitext&format=json"			);
+						var msgBox = new OO.ui.MessageWidget( {
+							icon: 'pageSettings',
+							type: 'notice',
+							label: 'در حال پردازش درخواست — آغاز درخواست ویرایش، در حال دریافت اطلاعات بخش به‌منظور ویرایش.'
+						});
+						var progressBar = new OO.ui.ProgressBarWidget( {
+							progress: false	
+						});
+						var currentBox = currentRow.parentElement.parentElement
+						currentBox.style = "padding-bottom:10px";
+						currentBox.innerHTML = "";
+						$(currentBox).append(progressBar.$element);
+						$(currentBox).append(msgBox.$element);
+						progressBar.$element[0].style = "margin:auto";
+						msgBox.$element[0].style = "margin:10px auto 0px; max-width:50em";
+						$.ajax({
+								url: "https://fa.wikipedia.org/w/api.php?action=parse&page=ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"&prop=wikitext&format=json",
+								success: function(data) {
+									var wikitext=getWiki(data,msgBox,header).replace(/(\=\=.+?=\=)/s, "$1\n{{بسته|ناموفق=بله}}\n"+jamReason.value+"  SIGNATURE")+"{{پایان بسته}}"
+									//console.log(q2)
+									var editSummary = "test:"+jamReason.value
+									var pageName ="کاربر:Nightdevil/صفحه تمرین"
+									var secIndx;
+									msgBox.setLabel('در حال پردازش درخواست — در حال ارسال اطلاعات به سرور')
+									postEdit(wikitext, editSummary, pageName, secIndx);
+								},
+								error: function(xhr, error) {
+									msgBox.setLabel('خطا در ارتباط با سرور')
+									console.log(xhr);
+									console.log(error);
+								}
+						});	
+						
+					} else {
+						console.log( 'User clicked "Cancel" or closed the dialog.' );
+							}
+					
+				})
+				
+				
+			}
+
 	function addButtons(currentRow, header) {
 			//	var header = currentRow.parentElement.parentElement.parentElement.parentElement.children[0].children[1].id
 			//	console.log(header)
@@ -36,7 +144,7 @@
 						{data:"۲۰۲۴", label: "سال ۲۰۲۴"}
 					],indicator: 'required'
 				});
-				amikYear.$element[0].style = "text-align:center; margin:auto;width:150px";
+				amikYear.$element[0].style = "text-align:center;width:150px";
 				//hzLayoutT.addItems([amikYear]);
 				
 				//ورود هفته
@@ -64,6 +172,8 @@
 				});
 				doneB.$element[0].style = "margin:auto;width:150px";
 				doneB.on("click", function() {
+				OO.ui.confirm("آیا از جمع‌بندی موفقانهٔ این پیشنهاد ("+header+") اطمینان دارید؟").done(function(confirmed) {
+				if ( confirmed ) {
 					//msg box
 					var msgBox = new OO.ui.MessageWidget( {
 						icon: 'pageSettings',
@@ -84,7 +194,6 @@
 					//get amikText
 					var api = new mw.Api();
 						api.get( {action: 'parse',prop: 'wikitext', format: 'json', page: "ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header} ).done( function ( data ) {
-							//var wikitext=getWiki(data,msgBox,header)
 							var amikText = getWiki(data,msgBox,header).match(/\{\{گفتاورد\|(.*?)؟/)[0].substring(10)
 							// if weekly template exists	
 							api.get( {action: 'parse',prop: 'wikitext', format: 'json', page: amikWeekURL} ).done( function ( data ) {
@@ -100,7 +209,9 @@
 										talkTemplate(header,amikText,amikYear,amikWeek_,msgBox, currentBox, progressBar)
 										}).fail(function(){msgBox.setLabel("خطا در ذخیره کردن الگوی هفته. عملیات متوقف شد.")})
 								}else{
-									msgBox.setLabel("الگوی هفتهٔ انتخاب‌شده ("+amikWeekURL+")جای خالی ندارد. هفته‌ای دیگر را انتخاب کنید.");
+									msgBox.setLabel("الگوی هفتهٔ انتخاب‌شده ("+amikWeekURL+") جای خالی ندارد. هفته‌ای دیگر را انتخاب کنید.");
+									msgBox.setType("error");
+									msgBox.setIcon("alert");
 									var jjjjj = new OO.ui.ButtonWidget( {
 										icon: "back",
 										label: "بازگشت",
@@ -132,9 +243,22 @@
 						}).fail(function(error){
 							msgBox.setLabel("خطا در خواندن [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"]]. ممکن است عنوان آمیک پیشنهادی در صفحه پیش‌نویس اشتباه وارد شده باشد و باید دستی جمع‌بندی شود.")
 							console.log("failed")});
+					}
+						
 				});
-				
-						//دکمه جمع‌بندی ناموفق
+				})
+				//دراپ‌داون انتخاب سال
+				var jamReason = new OO.ui.DropdownInputWidget( {
+					options: [
+						{data: "جمع‌بندی نرم"},
+						{data:"مقاله کمتر از ۲۰۰ کلمه"},
+						{data:"بدون منبع معتبر"},
+						{data:"عدم جذابیت"},
+						{data:"نقض معیارهای عمومی آمیک"},
+						{data:"مخالفت اجماع کاربران"}
+					],indicator: 'required', label: 'دلیل جمع‌بندی ناموفق', labelPosition: 'before', align: 'center'
+				});
+				//دکمه جمع‌بندی ناموفق
 				var jamBandiNo = new OO.ui.ButtonWidget( {
 					icon: "clear",
 					label: "جمع‌بندی ناموفق آمیک",
@@ -142,126 +266,17 @@
 					flags: ["primary", "destructive"],
 				});
 				jamBandiNo.on("click", function() {
-					execute(currentRow, header);
+					execute(currentRow, header, jamReason);
 				});
-				$(currentRow).append(jamBandiNo.$element)
-				jamBandiNo.$element[0].style = "margin:auto;width:150px";
+				jamReason.$element[0].style = "width:150px";
+				jamBandiNo.$element[0].style = "width:150px";
 
 				//ایجاد نوار افقی
 				var hzLayoutT = new OO.ui.FieldsetLayout( {label: 'مشخص کنید که آمیک در چه هفته از چه سالی در صفحهٔ اصلی نمایش یابد',helpInline: true,
 					help:"الان در هفتهٔ "+week(currentTime.getFullYear(), currentTime.getMonth() + 1, currentTime.getDate())+"م از سال"+currentTime.getFullYear()+" هستیم"} );
-				hzLayoutT.addItems([amikYear, amikWeek, doneB, jamBandiNo]);
+				hzLayoutT.addItems([amikYear, amikWeek, doneB, jamReason, jamBandiNo]);
 
 				$(currentRow.children[2]).append(hzLayoutT.$element);
-				
-			}
-
-function talkTemplate(header,amikText,amikYear,amikWeek_,msgBox, currentBox, progressBar){
-		var api = new mw.Api();
-			api.get( {action: 'parse',prop: 'wikitext', format: 'json', page: "بحث:"+header, section:0} ).done( function ( data ) {
-				//if there is a talk page
-			var wikitext = getWiki(data,msgBox,header)+"{{تاریخچه مقاله| dykdate = "+amikYear.value+"0100+"+amikWeek_+"weeks| dykentry = "+amikText+"| dyklink = ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"}}";
-			api.postWithEditToken({action: 'edit', title: "کاربر:Nightdevil/ر",text: wikitext,minor: true, summary: "test"
-				}).done(function(result) {
-				msgBox.setLabel("الگوی تاریخچه با موفقیت به بحث مقاله افزوده شد. در حال افزودن الگوی {{بسته}} آمیک به این گفتگو.")
-				closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressBar);
-				}).fail(function(){msgBox.setLabel("خطا در ذخیره کردن الگوی هفته. عملیات متوقف شد.")})
-		
-			}).fail(function(){
-			//if there is no talk page
-			var wikitext = "{{رتب}}{{بصب}}{{تاریخچه مقاله| dykdate = "+amikYear.value+"0100+"+amikWeek_+"weeks| dykentry = "+amikText+"| dyklink = ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"}}";
-			api.postWithEditToken({action: 'edit', title: "کاربر:Nightdevil/ر",text: wikitext,minor: true, summary: "test"
-				}).done(function(result) {
-				msgBox.setLabel("صفجه بحث مقاله ساخته شد و الگوی تاریخچه با موفقیت به آن افزوده شد. در حال افزودن الگوی {{بسته}} آمیک به این گفتگو.")
-				closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressBar);
-				}).fail(function(error){msgBox.setLabel("خطا در ذخیره کردن الگوی هفته. عملیات متوقف شد.")})
-			})
-}
-
-function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressBar){
-	var api = new mw.Api();
-	api.get({action: 'parse',prop: 'wikitext', format: 'json', page:"ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header}).done(function(data){
-		var wikitext=getWiki(data,msgBox,header).replace(/(\=\=.+?=\=)/s, "$1\n{{بسته}}").replace("| هفته =","| هفته ="+amikWeek_).replace("| سال =","| سال ="+amikYear.value)+"{{پایان بسته}}";
-		api.postWithEditToken({action: 'edit', title: "کاربر:Nightdevil/ر", text: wikitext, minor: true, summary: "test"}).done(function() {
-			msgBox.setLabel("وظیفه با موفقیت انجام شد.");
-			msgBox.setIcon("check");
-			msgBox.setType("success");
-			progressBar.$element.remove();
-			currentBox.innerHTML += '<p>آمیک <b>'+header+'</b> به <a href="https://fa.wikipedia.org/wiki/ویکی‌پدیا:آیا می‌دانستید که...؟/'+amikYear.value+'/هفته '+amikWeek_+'">الگوی هفتهٔ '+amikWeek_+'</a> از سال '+amikYear.value+' افزوده شد.</p><p>تاریخچهٔ آمیک در <a href="https://fa.wikipedia.org/wiki/بحث:'+header+'">صفحهٔ بحث مقالهٔ '+header+'</a> ثبت شد.</p><p>صفحهٔ <a href="https://fa.wikipedia.org/wiki/ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/'+header+'">گفتگوی پیش&zwnj;نویس آمیک</a> بسته شد.</p>';
-		}).fail(function() {msgBox.setLabel("خطا در دخیره الگوی جمع‌بندی بحث. عملیات ناموفق بود.");})
-	}).fail(function(){msgBox.setLabel("خطا در ارتباط با سرور");})
-}
-
-
-	function getWiki(data,msgBox,header) {
-				try{
-					let pages = data.parse.wikitext;
-					let firstKey = Object.keys(pages);
-					return pages[firstKey];
-				}
-				catch(e){
-					msgBox.setLabel("خطا در خواندن [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"]]. ممکن است عنوان آمیک پیشنهادی در صفحه پیش‌نویس اشتباه وارد شده باشد و باید دستی جمع‌بندی شود.")
-				}
-			}
-
-	function postEdit(wikitext, editSummary, pageName, secIdx) {
-				var api = new mw.Api();
-				api.postWithEditToken({
-					action: 'edit',
-					title: pageName,
-					text: wikitext,
-					section: secIdx,
-					minor: true,
-					summary: editSummary
-				}).done(function(result) {
-					window.location = "/w/index.php?title=" + pageName + "&type=revision&diff=cur&oldid=prev";
-				});
-			}
-
-	function execute(currentRow, header){
-				mw.util.addCSS('.oo-ui-window-frame { width: 700px!important; }');
-				OO.ui.confirm("آیا از جمع‌بندی ناموفق این پیشنهاد ("+header+") اطمینان دارید؟").done(function(confirmed) {
-					if ( confirmed ) {
-			//			console.log( "https://fa.wikipedia.org/w/api.php?action=parse&page={{ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"}}&prop=wikitext&format=json"			);
-						var msgBox = new OO.ui.MessageWidget( {
-							icon: 'pageSettings',
-							type: 'notice',
-							label: 'در حال پردازش درخواست — آغاز درخواست ویرایش، در حال دریافت اطلاعات بخش به‌منظور ویرایش.'
-						});
-						var progressBar = new OO.ui.ProgressBarWidget( {
-							progress: false	
-						});
-						var currentBox = currentRow.parentElement.parentElement
-						currentBox.style = "padding-bottom:10px";
-						currentBox.innerHTML = "";
-						$(currentBox).append(progressBar.$element);
-						$(currentBox).append(msgBox.$element);
-						progressBar.$element[0].style = "margin:auto";
-						msgBox.$element[0].style = "margin:10px auto 0px; max-width:50em";
-						$.ajax({
-								url: "https://fa.wikipedia.org/w/api.php?action=parse&page=ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"&prop=wikitext&format=json",
-								success: function(data) {
-									var wikitext=getWiki(data,msgBox,header).replace(/(\=\=.+?=\=)/s, "$1\n{{بسته|ناموفق=بله}}")+"{{پایان بسته}}"
-									//console.log(q2)
-									var editSummary = "test"
-									var pageName ="کاربر:Nightdevil/صفحه تمرین"
-									var secIndx;
-									msgBox.setLabel('در حال پردازش درخواست — در حال ارسال اطلاعات به سرور')
-									postEdit(wikitext, editSummary, pageName, secIndx);
-								},
-								error: function(xhr, error) {
-									msgBox.setLabel('خطا در ارتباط با سرور')
-									console.log(xhr);
-									console.log(error);
-								}
-						});	
-						
-					} else {
-						console.log( 'User clicked "Cancel" or closed the dialog.' );
-							}
-					
-				})
-				
 				
 			}
 
