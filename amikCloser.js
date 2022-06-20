@@ -214,7 +214,6 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 									msgBox.$element.remove();
 									progressBar.$element.remove();
 									$(currentBox).append(topLayout.$element)
-									$(currentBox).append(hzLayoutT.$element)
 									msgBox.$element.remove();
 									progressBar.$element.remove();
 									jjjjj.$element.remove();
