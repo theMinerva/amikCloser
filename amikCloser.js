@@ -45,7 +45,7 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 				}
 			}
 
-	function postEdit(wikitext, editSummary, pageName, secIdx) {
+	function postEdit_(wikitext, editSummary, pageName, secIdx) {
 				var api = new mw.Api();
 				api.postWithEditToken({
 					action: 'edit',
@@ -59,8 +59,7 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 				});
 			}
 
-	function execute(currentRow, header, jamReason){
-				mw.util.addCSS('.oo-ui-window-frame { width: 700px!important; }');
+	function failClose(currentRow, header, jamReason){
 				OO.ui.confirm("آیا از جمع‌بندی ناموفق این پیشنهاد ("+header+") اطمینان دارید؟ \n دلیل: "+ jamReason.value).done(function(confirmed) {
 					if ( confirmed ) {
 			//			console.log( "https://fa.wikipedia.org/w/api.php?action=parse&page={{ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"}}&prop=wikitext&format=json"			);
@@ -79,13 +78,13 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 						$.ajax({
 								url: "https://fa.wikipedia.org/w/api.php?action=parse&page=ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"&prop=wikitext&format=json",
 								success: function(data) {
-									var wikitext=getWiki(data,msgBox,header).replace(/(\=\=.+?=\=)/s, "$1\n{{بسته|ناموفق=بله}}\n"+jamReason.value+"  ~~~~")+"{{پایان بسته}}"
+									var wikitext=getWiki(data,msgBox,header).replace(/(\=\=.+?=\=)/s, "$1\n{{بسته|ناموفق=بله}}\n"+jamReason.value+"  ~~"+"~~")+"{{پایان بسته}}"
 									//console.log(q2)
 									var editSummary = "جمع‌بندی ناموفق [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"]] ("+jamReason.value+") ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
 									var pageName ="ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header
 									var secIndx;
 									msgBox.setLabel('در حال پردازش درخواست — در حال ارسال اطلاعات به سرور')
-									postEdit(wikitext, editSummary, pageName, secIndx);
+									postEdit_(wikitext, editSummary, pageName, secIndx);
 								},
 								error: function(xhr, error) {
 									msgBox.setLabel('خطا در ارتباط با سرور')
@@ -103,7 +102,7 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 				
 			}
 
-	function addButtons(currentRow, header) {
+	function addButtons_(currentRow, header) {
 			//	var header = currentRow.parentElement.parentElement.parentElement.parentElement.children[0].children[1].id
 			//	console.log(header)
 			var currentBox = currentRow.parentElement.parentElement
@@ -261,12 +260,12 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 					flags: ["primary", "destructive"],
 				});
 				jamBandiNo.on("click", function() {
-					execute(currentRow, header, jamReason);
+					failClose(currentRow, header, jamReason);
 				});
 
 				//ایجاد نوار 
 				var hzLayoutT = new OO.ui.FieldsetLayout( {label: '',helpInline: true,
-					help:"دلیل جمع‌بندی غیر موفق"
+					help:"دلیل جمع‌بندی ناموفق"
 					} );
 				var topLayout = new OO.ui.FieldsetLayout( {helpInline: true,
 					help:"مشخص کنید که آمیک در چه هفته از چه سالی در صفحهٔ اصلی نمایش یابد. الان در هفتهٔ "+toFa(week(currentTime.getFullYear(), currentTime.getMonth() + 1, currentTime.getDate()))+"م از سال "+toFa(currentTime.getFullYear())+" هستیم"
@@ -297,9 +296,9 @@ function toFa(foo){
 							//console.log(header)
 							var currentRow = currentBox.children[6].children[0];	//تعریف نوار
 							if (amikBoxes[i].parentElement.children[0].tagName == "SMALL") {//چک کردن اینکه قبلا بسته شده است
-							//	addButtons(currentBox);		// 
+							//	addButtons_(currentBox);		// 
 							} else if (amikBoxes[i].children[0].children[0].children[0].textContent.slice(6,10) == "آمیک") { 
-								addButtons(currentRow,header);		//افزودن دکمه جمع‌بندی
+								addButtons_(currentRow,header);		//افزودن دکمه جمع‌بندی
 							
 						}
 					}
