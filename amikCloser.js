@@ -3,7 +3,7 @@ function talkTemplate(header,amikText,amikYear,amikWeek_,msgBox, currentBox, pro
 			api.get( {action: 'parse',prop: 'wikitext', format: 'json', page: "بحث:"+header, section:0} ).done( function ( data ) {
 				//if there is a talk page
 			var wikitext = getWiki(data,msgBox,header)+"{{تاریخچه مقاله| dykdate = "+amikYear.value+"0100+"+amikWeek_+"weeks| dykentry = "+amikText+"| dyklink = ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"}}";
-			api.postWithEditToken({action: 'edit', title: "کاربر:Nightdevil/ر",text: wikitext,minor: true, summary: "test"
+			api.postWithEditToken({action: 'edit', title: "کاربر:Nightdevil/ر",text: wikitext,minor: true, summary: "افزودن الگوی تاریخچهٔ آمیک به بحث مقالهٔ [["+header+"]] ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
 				}).done(function(result) {
 				msgBox.setLabel("الگوی تاریخچه با موفقیت به بحث مقاله افزوده شد. در حال افزودن الگوی {{بسته}} آمیک به این گفتگو.")
 				closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressBar);
@@ -12,7 +12,7 @@ function talkTemplate(header,amikText,amikYear,amikWeek_,msgBox, currentBox, pro
 			}).fail(function(){
 			//if there is no talk page
 			var wikitext = "{{رتب}}{{بصب}}{{تاریخچه مقاله| dykdate = "+amikYear.value+"0100+"+amikWeek_+"weeks| dykentry = "+amikText+"| dyklink = ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"}}";
-			api.postWithEditToken({action: 'edit', title: "کاربر:Nightdevil/ر",text: wikitext,minor: true, summary: "test"
+			api.postWithEditToken({action: 'edit', title: "کاربر:Nightdevil/ر",text: wikitext,minor: true, summary: "افزودن الگوی تاریخچهٔ آمیک و ایجاد صفحهٔ بحث مقالهٔ [["+header+"]] ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
 				}).done(function(result) {
 				msgBox.setLabel("صفجه بحث مقاله ساخته شد و الگوی تاریخچه با موفقیت به آن افزوده شد. در حال افزودن الگوی {{بسته}} آمیک به این گفتگو.")
 				closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressBar);
@@ -24,7 +24,7 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 	var api = new mw.Api();
 	api.get({action: 'parse',prop: 'wikitext', format: 'json', page:"ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header}).done(function(data){
 		var wikitext=getWiki(data,msgBox,header).replace(/(\=\=.+?=\=)/s, "$1\n{{بسته}}").replace("| هفته =","| هفته ="+amikWeek_).replace("| سال =","| سال ="+amikYear.value)+"{{پایان بسته}}";
-		api.postWithEditToken({action: 'edit', title: "کاربر:Nightdevil/ر", text: wikitext, minor: true, summary: "test"}).done(function() {
+		api.postWithEditToken({action: 'edit', title: "کاربر:Nightdevil/ر", text: wikitext, minor: true, summary: "جمع‌بندی موفقانهٔ [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"]] ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"}).done(function() {
 			msgBox.setLabel("وظیفه با موفقیت انجام شد.");
 			msgBox.setIcon("check");
 			msgBox.setType("success");
@@ -79,9 +79,9 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 						$.ajax({
 								url: "https://fa.wikipedia.org/w/api.php?action=parse&page=ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"&prop=wikitext&format=json",
 								success: function(data) {
-									var wikitext=getWiki(data,msgBox,header).replace(/(\=\=.+?=\=)/s, "$1\n{{بسته|ناموفق=بله}}\n"+jamReason.value+"  SIGNATURE")+"{{پایان بسته}}"
+									var wikitext=getWiki(data,msgBox,header).replace(/(\=\=.+?=\=)/s, "$1\n{{بسته|ناموفق=بله}}\n"+jamReason.value+"  ~~~~")+"{{پایان بسته}}"
 									//console.log(q2)
-									var editSummary = "test:"+jamReason.value
+									var editSummary = "جمع‌بندی ناموفق [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"]] ("+jamReason.value+") ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
 									var pageName ="کاربر:Nightdevil/صفحه تمرین"
 									var secIndx;
 									msgBox.setLabel('در حال پردازش درخواست — در حال ارسال اطلاعات به سرور')
@@ -195,7 +195,7 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 								if(getWiki(data,msgBox,header).includes("… <!-- متن آمیک -->؟")){
 									// see if there is a place
 									var wikitext = getWiki(data,msgBox,header).replace("… <!-- متن آمیک -->؟",amikText)
-									var editSummary = "test"
+									var editSummary = "افزودن آمیک [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"]] به الگوی هفتگی ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
 									var pageName ="کاربر:Nightdevil/گز"
 									api.postWithEditToken({action: 'edit', title: pageName,text: wikitext,minor: true, summary: editSummary
 										}).done(function(result) {
@@ -214,6 +214,7 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 									jjjjj.on("click", function() {
 									msgBox.$element.remove();
 									progressBar.$element.remove();
+									$(currentBox).append(topLayout.$element)
 									$(currentBox).append(hzLayoutT.$element)
 									msgBox.$element.remove();
 									progressBar.$element.remove();
@@ -227,7 +228,7 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 								msgBox.setLabel('الگوی هفته مورد نظر هنوز ساخته نشده است. در حال ساخت صفحه ...');
 								api.get( {action: 'parse',prop: 'wikitext', format: 'json', page:"ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌بارگذاری الگوی هفتگی"} ).done( function ( data ) {
 								var wikitext = getWiki(data,msgBox,header).replace("… <!-- متن آمیک -->؟",amikText)
-								api.postWithEditToken({action: 'edit', title: "کاربر:Nightdevil/پ",text: wikitext,minor: true, summary: "test"
+								api.postWithEditToken({action: 'edit', title: "کاربر:Nightdevil/پ",text: wikitext,minor: true, summary: "افزودن آمیک [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"]] به الگوی هفتگی ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
 										}).done(function(result) {
 										msgBox.setLabel("الگوی هفته با موفقیت ایجاد شد. در حال افزودن الگوی {{تاریخچه مقاله}} آمیک به بحث مقاله.")
 										talkTemplate(header,amikText,amikYear,amikWeek_,msgBox, currentBox, progressBar)
@@ -275,7 +276,6 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 				hzLayoutT.addItems([jamReason, jamBandiNo]);
 				$(currentRow.children[2]).append(topLayout.$element);
 				$(currentRow.children[2]).append(hzLayoutT.$element);
-				topLayout.$element.style = "text-align:center; display: block; margin:auto";
 				
 				
 			}
