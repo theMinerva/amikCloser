@@ -3,7 +3,7 @@ function talkTemplate(header,amikText,amikYear,amikWeek_,msgBox, currentBox, pro
 			api.get( {action: 'parse',prop: 'wikitext', format: 'json', page: "بحث:"+header, section:0} ).done( function ( data ) {
 				//if there is a talk page
 			var wikitext = getWiki(data,msgBox,header)+"{{تاریخچه مقاله| dykdate = "+amikYear.value+"0100+"+amikWeek_+"weeks| dykentry = "+amikText+"| dyklink = ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"}}";
-			api.postWithEditToken({action: 'edit', title: "بحث:"+header,text: wikitext,minor: true, summary: "افزودن الگوی تاریخچهٔ آمیک به بحث مقالهٔ [["+header+"]] ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
+			api.postWithEditToken({action: 'edit', title: "بحث:"+header,text: wikitext,minor: false, summary: "افزودن الگوی تاریخچهٔ آمیک به بحث مقالهٔ [["+header+"]] ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
 				}).done(function(result) {
 				msgBox.setLabel("الگوی تاریخچه با موفقیت به بحث مقاله افزوده شد. در حال افزودن الگوی {{بسته}} آمیک به این گفتگو.")
 				closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressBar);
@@ -12,7 +12,7 @@ function talkTemplate(header,amikText,amikYear,amikWeek_,msgBox, currentBox, pro
 			}).fail(function(){
 			//if there is no talk page
 			var wikitext = "{{رتب}}{{بصب}}{{تاریخچه مقاله| dykdate = "+amikYear.value+"0100+"+amikWeek_+"weeks| dykentry = "+amikText+"| dyklink = ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"}}";
-			api.postWithEditToken({action: 'edit', title: "بحث:"+header,text: wikitext,minor: true, summary: "افزودن الگوی تاریخچهٔ آمیک و ایجاد صفحهٔ بحث مقالهٔ [["+header+"]] ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
+			api.postWithEditToken({action: 'edit', title: "بحث:"+header,text: wikitext,minor: false, summary: "افزودن الگوی تاریخچهٔ آمیک و ایجاد صفحهٔ بحث مقالهٔ [["+header+"]] ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
 				}).done(function(result) {
 				msgBox.setLabel("صفجه بحث مقاله ساخته شد و الگوی تاریخچه با موفقیت به آن افزوده شد. در حال افزودن الگوی {{بسته}} آمیک به این گفتگو.")
 				closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressBar);
@@ -24,7 +24,7 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 	var api = new mw.Api();
 	api.get({action: 'parse',prop: 'wikitext', format: 'json', page:"ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header}).done(function(data){
 		var wikitext=getWiki(data,msgBox,header).replace(/(\=\=.+?=\=)/s, "$1\n{{بسته}}").replace("| هفته =","| هفته ="+amikWeek_).replace("| سال =","| سال ="+amikYear.value)+"{{پایان بسته}}";
-		api.postWithEditToken({action: 'edit', title: "ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header, text: wikitext, minor: true, summary: "جمع‌بندی موفقانهٔ [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"]] ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"}).done(function() {
+		api.postWithEditToken({action: 'edit', title: "ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header, text: wikitext, minor: false, summary: "جمع‌بندی موفقانهٔ [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"]] ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"}).done(function() {
 			msgBox.setLabel("وظیفه با موفقیت انجام شد.");
 			msgBox.setIcon("check");
 			msgBox.setType("success");
@@ -52,7 +52,7 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 					title: pageName,
 					text: wikitext,
 					section: secIdx,
-					minor: true,
+					minor: false,
 					summary: editSummary
 				}).done(function(result) {
 					window.location = "/w/index.php?title=" + pageName + "&type=revision&diff=cur&oldid=prev";
@@ -197,7 +197,7 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 									var wikitext = getWiki(data,msgBox,header).replace("… <!-- متن آمیک -->؟",amikText)
 									var editSummary = "افزودن آمیک [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"]] به الگوی هفتگی ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
 									var pageName =amikWeekURL
-									api.postWithEditToken({action: 'edit', title: pageName,text: wikitext,minor: true, summary: editSummary
+									api.postWithEditToken({action: 'edit', title: pageName,text: wikitext,minor: false, summary: editSummary
 										}).done(function(result) {
 										msgBox.setLabel("الگوی هفته با موفقیت ذخیره شد. در حال افزودن الگوی {{تاریخچه مقاله}} آمیک به بحث مقاله.")
 										talkTemplate(header,amikText,amikYear,amikWeek_,msgBox, currentBox, progressBar)
@@ -228,7 +228,7 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 								msgBox.setLabel('الگوی هفته مورد نظر هنوز ساخته نشده است. در حال ساخت صفحه ...');
 								api.get( {action: 'parse',prop: 'wikitext', format: 'json', page:"ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌بارگذاری الگوی هفتگی"} ).done( function ( data ) {
 								var wikitext = getWiki(data,msgBox,header).replace("… <!-- متن آمیک -->؟",amikText)
-								api.postWithEditToken({action: 'edit', title: amikWeekURL,text: wikitext,minor: true, summary: "افزودن آمیک [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"]] به الگوی هفتگی ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
+								api.postWithEditToken({action: 'edit', title: amikWeekURL,text: wikitext,minor: false, summary: "افزودن آمیک [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"]] به الگوی هفتگی ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
 										}).done(function(result) {
 										msgBox.setLabel("الگوی هفته با موفقیت ایجاد شد. در حال افزودن الگوی {{تاریخچه مقاله}} آمیک به بحث مقاله.")
 										talkTemplate(header,amikText,amikYear,amikWeek_,msgBox, currentBox, progressBar)
