@@ -1,4 +1,5 @@
 //v#1.1.0
+var q;
 function talkTemplate(header,amikText,amikYear,amikWeek_,msgBox, currentBox, progressBar){
 		var api = new mw.Api();
 			api.get( {action: 'parse',prop: 'wikitext', format: 'json', page: "بحث:"+header, section:0} ).done( function ( data ) {
@@ -35,6 +36,14 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 	}).fail(function(){msgBox.setLabel("خطا در ارتباط با سرور");})
 }
 
+function closeFailSuccess(header, msgBox, currentBox, progressBar,jamReason){
+			msgBox.setLabel("جمع‌بندی ناموفق ("+jamReason.value+") موفقانه انجام شد."+header)
+			msgBox.setIcon("check");
+			msgBox.setType("success");
+			progressBar.$element.remove();
+			currentBox.innerHTML += '<p>صفحهٔ <a href="https://fa.wikipedia.org/wiki/ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/'+header+'">گفتگوی پیش&zwnj;نویس آمیک</a> بسته شد.</p>';
+}
+
 	function getWiki(data,msgBox,header) {
 				try{
 					let pages = data.parse.wikitext;
@@ -46,24 +55,22 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 				}
 			}
 
-	function postEdit_(wikitext, editSummary, pageName, secIdx) {
+	function postEdit_(wikitext, editSummary, pageName, header, msgBox, currentBox, progressBar,jamReason) {
 				var api = new mw.Api();
 				api.postWithEditToken({
 					action: 'edit',
 					title: pageName,
 					text: wikitext,
-					section: secIdx,
 					minor: false,
 					summary: editSummary
 				}).done(function(result) {
-					window.location = "/w/index.php?title=" + pageName + "&type=revision&diff=cur&oldid=prev";
+					closeFailSuccess(header, msgBox, currentBox, progressBar,jamReason);
 				});
 			}
 
 	function failClose(currentRow, header, jamReason){
 				OO.ui.confirm("آیا از جمع‌بندی ناموفق این پیشنهاد ("+header+") اطمینان دارید؟ \n دلیل: "+ jamReason.value).done(function(confirmed) {
 					if ( confirmed ) {
-			//			console.log( "https://fa.wikipedia.org/w/api.php?action=parse&page={{ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"}}&prop=wikitext&format=json"			);
 						var msgBox = new OO.ui.MessageWidget( {
 							icon: 'pageSettings',
 							type: 'notice',
@@ -76,6 +83,24 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 						currentBox.innerHTML = "";
 						$(currentBox).append(progressBar.$element);
 						$(currentBox).append(msgBox.$element);
+						if (jamReason.value=="جمع‌بندی نرم"){
+							
+							var api = new mw.Api();
+							api.get({action:'parse', page:"ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header,
+							prop:"wikitext", format:"json"}).done(function(data){
+								wikiText=data.parse.wikitext['*']+"{{جا:جمع‌بندی نرم پامیک}}";
+								msgBox.setLabel('الگوی جمع‌بندی نرم پامیک تراگنجانیده شد. در حال ذخیرهٔ صفحهٔ پیش‌نویس '+header)
+								api.postWithEditToken({
+									action:"edit", title:"ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header,
+									text:wikiText, summary:"جمع‌بندی ناموفق [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"]] ("+jamReason.value+") ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
+									}).done(function(){
+										closeFailSuccess(header, msgBox, currentBox, progressBar,jamReason)
+									}).fail(function(){
+										msgBox.setLabel('خطا در ارتباط با سرور')
+									})
+								
+							}).fail(function(){msgBox.setLabel('خطا در دریافت اطلاعات صفحه پیش‌نویس آمیک')})
+							} else{
 						$.ajax({
 								url: "https://fa.wikipedia.org/w/api.php?action=parse&page=ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"&prop=wikitext&format=json",
 								success: function(data) {
@@ -83,9 +108,8 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 									//console.log(q2)
 									var editSummary = "جمع‌بندی ناموفق [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"]] ("+jamReason.value+") ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
 									var pageName ="ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header
-									var secIndx;
 									msgBox.setLabel('در حال پردازش درخواست — در حال ارسال اطلاعات به سرور')
-									postEdit_(wikitext, editSummary, pageName, secIndx);
+									postEdit_(wikitext, editSummary, pageName, header, msgBox, currentBox, progressBar,jamReason);
 								},
 								error: function(xhr, error) {
 									msgBox.setLabel('خطا در ارتباط با سرور')
@@ -94,6 +118,7 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 								}
 						});	
 						
+						}
 					} else {
 						console.log( 'User clicked "Cancel" or closed the dialog.' );
 							}
