@@ -1,3 +1,4 @@
+//v#1.1.0
 function talkTemplate(header,amikText,amikYear,amikWeek_,msgBox, currentBox, progressBar){
 		var api = new mw.Api();
 			api.get( {action: 'parse',prop: 'wikitext', format: 'json', page: "بحث:"+header, section:0} ).done( function ( data ) {
@@ -248,7 +249,7 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 						{data:"بدون منبع معتبر"},
 						{data:"عدم جذابیت"},
 						{data:"نقض معیارهای عمومی آمیک"},
-						{data:"مخالفت اجماع کاربران"}
+						{data:"عدم اجماع کاربران"}
 					],indicator: 'required', label: 'دلیل جمع‌بندی ناموفق', labelPosition: 'before', align: 'center'
 				});
 				//دکمه جمع‌بندی ناموفق
