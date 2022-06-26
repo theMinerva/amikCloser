@@ -33,7 +33,7 @@
 	function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressBar){
 		var api = new mw.Api();
 		api.get({action: 'parse',prop: 'wikitext', format: 'json', page:"ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header}).done(function(data){
-			var wikitext=getWiki(data,msgBox,header).replace(/(\=\=.+?=\=)/s, "$1\n{{بسته}}").replace("| هفته =","| هفته ="+amikWeek_).replace("| سال =","| سال ="+amikYear.value)+"{{پایان بسته}}";
+			var wikitext=getWiki(data,msgBox,header).replace(/(\=\=.+?=\=)/s, "$1\n{{بسته}}\n{{شد}} ~~"+"~~").replace("| هفته =","| هفته ="+amikWeek_).replace("| سال =","| سال ="+amikYear.value)+"{{پایان بسته}}";
 			api.postWithEditToken({action: 'edit', 
 			//title: "ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header,
 			title:'کاربر:Nightdevil/ذ',
@@ -291,7 +291,7 @@
 								var api = new mw.Api();
 								api.get({action:'parse', page:"ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header,
 								prop:"wikitext", format:"json"}).done(function(data){
-									wikiText=data.parse.wikitext['*'].replace(/(\=\=.+?=\=)/s, "$1\n<small> </small>\n"+"{{جا:جمع‌بندی نرم پامیک}}";
+									wikiText=data.parse.wikitext['*'].replace(/(\=\=.+?=\=)/s, "$1\n<small> </small>\n")+"{{جا:جمع‌بندی نرم پامیک}}";
 									msgBox.setLabel('الگوی جمع‌بندی نرم پامیک تراگنجانیده شد. در حال ذخیرهٔ صفحهٔ پیش‌نویس '+header)
 									api.postWithEditToken({
 										action:"edit", 
