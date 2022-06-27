@@ -105,89 +105,126 @@ function editFinalText(amikText, amikWeekURL, msgBox, header, amikYear, amikWeek
 }
 
 function processSucessClose(amikText, amikWeekURL, msgBox, header, amikYear, amikWeek_, currentBox, progressBar, topLayout, amikImage) {
-	if(amikImage){console.log(amikImage)}else{console.log("nO")}
-	// if weekly template exists
-	var api = new mw.Api();
-	api.get({
-		action: 'parse',
-		prop: 'wikitext',
-		format: 'json',
-		page: amikWeekURL
-	}).done(function(data) {
-		
-		
-		
-		msgBox.setLabel('الگوی هفته مورد نظر دریافت شد. در حال افزودن آمیک ...');
-		if(getWiki(data, msgBox, header).includes("… <!-- متن آمیک -->؟")) {
-			
-			
-			
-			// see if there is a place
-			var wikitext = getWiki(data, msgBox, header).replace("… <!-- متن آمیک -->؟", amikText);
-			var editSummary = "افزودن آمیک [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/" + header + "]] به الگوی هفتگی ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])";
-			var pageName = amikWeekURL;
-			api.postWithEditToken({
-				action: 'edit',
-				//title: pageName,
-				title: 'کاربر:Nightdevil/ی',
-				text: wikitext,
-				minor: false,
-				summary: editSummary
-			}).done(function(result) {
-				msgBox.setLabel("الگوی هفته با موفقیت ذخیره شد. در حال افزودن الگوی {{تاریخچه مقاله}} آمیک به بحث مقاله.");
-				talkTemplate(header, amikText, amikYear, amikWeek_, msgBox, currentBox, progressBar);
-			}).fail(function() {
-				msgBox.setLabel("خطا در ذخیره کردن الگوی هفته. عملیات متوقف شد.");
-			});
-			
-		} else {
-			msgBox.setLabel("الگوی هفتهٔ انتخاب‌شده (" + amikWeekURL + ") جای خالی ندارد. هفته‌ای دیگر را انتخاب کنید.");
-			msgBox.setType("error");
-			msgBox.setIcon("alert");
-			var jjjjj = new OO.ui.ButtonWidget({
-				icon: "back",
-				label: "بازگشت",
-				flags: ['destructive']
-			});
-			jjjjj.on("click", function() {
-				msgBox.$element.remove();
-				progressBar.$element.remove();
-				$(currentBox).append(topLayout.$element);
-				msgBox.$element.remove();
-				progressBar.$element.remove();
-				jjjjj.$element.remove();
-			});
-			$(currentBox).append(jjjjj.$element);
+
+
+//define goBack function
+function goBack(msgBox, amikWeekURL, progressBar, currentBox, topLayout, pic){
+	if(pic==true){
+	msgBox.setLabel("الگوی هفتهٔ انتخاب‌شده (" + amikWeekURL + ") جای خالی برای آمیک تصویردار ندارد. هفته‌ای دیگر را انتخاب کنید.");
+	}else{
+	msgBox.setLabel("الگوی هفتهٔ انتخاب‌شده (" + amikWeekURL + ") جای خالی برای آمیک بدون تصویر ندارد. هفته‌ای دیگر را انتخاب کنید.");
+	}
+	msgBox.setType("error");
+	msgBox.setIcon("alert");
+	var goBackButton = new OO.ui.ButtonWidget({
+		icon: "back",
+		label: "بازگشت",
+		flags: ['destructive']
+	});
+	goBackButton.on("click", function() {
+		msgBox.$element.remove();
+		progressBar.$element.remove();
+		$(currentBox).append(topLayout.$element);
+		msgBox.$element.remove();
+		progressBar.$element.remove();
+		goBackButton.$element.remove();
+	});
+$(currentBox).append(goBackButton.$element);
+}
+
+function saveAmikToWeek(amikText, amikImage, num){
+	if(num==1|num==2|num==3){
+		var wikitext = getWiki(data, msgBox, header).replace("مورد"+toFA(num)+"=* … <!-- متن آمیک -->؟", "مورد"+toFA(num)+"=* "+amikText).replace("تصویر"+toFA(num)+"=","تصویر"+toFA(num)+"="+amikImage);
+	}else{
+		var wikitext = getWiki(data, msgBox, header).replace("مورد"+toFA(num)+"=* … <!-- متن آمیک -->؟", "مورد"+toFA(num)+"=* "+amikText);
+	}
+	var editSummary = "افزودن آمیک [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/" + header + "]] به الگوی هفتگی ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])";
+	var pageName = amikWeekURL;
+	api.postWithEditToken({
+	action: 'edit',
+	//title: pageName,
+	title: 'کاربر:Nightdevil/ی',
+	text: wikitext,
+	minor: false,
+	summary: editSummary
+	}).done(function(result) {
+	msgBox.setLabel("الگوی هفته با موفقیت ذخیره شد. در حال افزودن الگوی {{تاریخچه مقاله}} آمیک به بحث مقاله.");
+	talkTemplate(header, amikText, amikYear, amikWeek_, msgBox, currentBox, progressBar);
+	}).fail(function() {
+		msgBox.setLabel("خطا در ذخیره کردن الگوی هفته. عملیات متوقف شد.");
+	});
+	
+}
+
+
+
+//if weekly page exists
+var api = new mw.Api();
+api.get({action: "parse",prop: "wikitext",format: "json",page: amikWeekURL
+}).done(function(data) {
+	msgBox.setLabel('الگوی هفته مورد نظر دریافت شد. در حال افزودن آمیک ...');
+	//is amik pictured or not
+	if(amikImage){
+		//pictured- does the page have 1st pictured slot empty
+		if(getWiki(data, msgBox, header).includes("مورد۱=* … <!-- متن آمیک -->؟")){
+			saveAmikToWeek(amikText, amikImage, 1)
+		//pictured- does the page have 2nd pictured slot empty
+		}else if(getWiki(data, msgBox, header).includes("مورد۲=* … <!-- متن آمیک -->؟")){
+			saveAmikToWeek(amikText, amikImage, 2)
+		//pictured- does the page have 3rd pictured slot empty
+		}else if(getWiki(data, msgBox, header).includes("مورد۳=* … <!-- متن آمیک -->؟")){
+			saveAmikToWeek(amikText, amikImage, 3)
+		//no pictured slots empty, go back
+		}else{
+		goBack(msgBox, amikWeekURL, progressBar, currentBox, topLayout, true)
 		}
-		//  console.log(getWiki(data,msgBox,header))
-		
-		
-		
-	}).fail(function(error) {
-		//create weekly page
-		msgBox.setLabel('الگوی هفته مورد نظر هنوز ساخته نشده است. در حال ساخت صفحه ...');
-		api.get({
-			action: 'parse',
-			prop: 'wikitext',
-			format: 'json',
-			page: "ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌بارگذاری الگوی هفتگی"
-		}).done(function(data) {
-			var wikitext = getWiki(data, msgBox, header).replace("… <!-- متن آمیک -->؟", amikText);
-			api.postWithEditToken({
-				action: 'edit',
-				//title: amikWeekURL,
-				title: 'کاربر:Nightdevil/ب',
-				text: wikitext,
-				minor: false,
-				summary: "افزودن آمیک [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/" + header + "]] به الگوی هفتگی ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
-			}).done(function(result) {
-				msgBox.setLabel("الگوی هفته با موفقیت ایجاد شد. در حال افزودن الگوی {{تاریخچه مقاله}} آمیک به بحث مقاله.");
-				talkTemplate(header, amikText, amikYear, amikWeek_, msgBox, currentBox, progressBar);
-			}).fail(function() {
-				msgBox.setLabel("خطا در ذخیره کردن الگوی هفته. عملیات متوقف شد.");
-			});
+	}else{//non-pictured
+		//non-pictured- does the page have 4th slot empty
+		if(getWiki(data, msgBox, header).includes("مورد۴=* … <!-- متن آمیک -->؟")){
+			saveAmikToWeek(amikText, amikImage, 4)
+		//non-pictured- does the page have 5th slot empty
+		}else if(getWiki(data, msgBox, header).includes("مورد۵=* … <!-- متن آمیک -->؟")){
+			saveAmikToWeek(amikText, amikImage, 5)
+		//non-pictured- does the page have 6th slot empty
+		}else if(getWiki(data, msgBox, header).includes("مورد۶=* … <!-- متن آمیک -->؟")){
+			saveAmikToWeek(amikText, amikImage, 6)
+		//no pictured slots empty, go back
+		}else{
+		goBack(msgBox, amikWeekURL, progressBar, currentBox, topLayout, false)
+		}
+	}
+
+//if weekly page doesn't exists
+}).fail(function() {
+	msgBox.setLabel('الگوی هفته مورد نظر هنوز ساخته نشده است. در حال ساخت صفحه ...');
+	api.get({action: "parse",prop: "wikitext",format: "json",
+		page: "ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌بارگذاری الگوی هفتگی"
+	}).done(function(data) {
+	//is amik pictured or not
+	if(amikImage){//pictured
+		//add to first slot and go to talktemplate
+		var wikitext = getWiki(data, msgBox, header).replace("مورد۱=* … <!-- متن آمیک -->؟", "|مورد۱=* "+amikText);
+	}else{//non-pictured
+		//add to fourth and go to talktemplate
+		var wikitext = getWiki(data, msgBox, header).replace("مورد۴=* … <!-- متن آمیک -->؟", "|مورد۴=* "+amikText);
+	}
+	api.postWithEditToken({
+		action: 'edit',
+		//title: amikWeekURL,
+		title: 'کاربر:Nightdevil/ب',
+		text: wikitext,
+		minor: false,
+		summary: "افزودن آمیک [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/" + header + "]] به الگوی هفتگی ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
+		}).done(function(result) {
+			msgBox.setLabel("الگوی هفته با موفقیت ایجاد شد. در حال افزودن الگوی {{تاریخچه مقاله}} آمیک به بحث مقاله.");
+			talkTemplate(header, amikText, amikYear, amikWeek_, msgBox, currentBox, progressBar);
+		}).fail(function() {
+			msgBox.setLabel("خطا در ذخیره کردن الگوی هفته. عملیات متوقف شد.");
 		});
 	});
+});
+
+	
 }
 
 function talkTemplate(header, amikText, amikYear, amikWeek_, msgBox, currentBox, progressBar) {
