@@ -2,6 +2,149 @@
 	var archsTemp; //don't remove
 	var archsSofts //don't remove
 
+function getWikitextPreview(amikText, previewField){
+	var api = new mw.Api();
+	api.get({action:'parse', format:'json', text:amikText, prop:"text", contentmodel:"wikitext"	
+	}).done(function(data){
+		previewField.setLabel(new OO.ui.HtmlSnippet( ''+data.parse.text['*']+'' ));
+		}).fail(function(data){console.log("failed");})
+	
+}
+
+function editFinalText(amikText,amikWeekURL,msgBox,header,amikYear,amikWeek_,currentBox,progressBar, amikTextOp){
+	var newAmikText;
+	function MyProcessDialog( config ) {
+		MyProcessDialog.super.call( this, config );
+	}
+	OO.inheritClass( MyProcessDialog, OO.ui.ProcessDialog );
+
+	MyProcessDialog.static.name = 'myProcessDialog';
+	MyProcessDialog.static.title = 'اصلاح متن آمیک';
+	MyProcessDialog.static.actions = [
+		{ action: 'save', label: 'ذخیره', flags: ['primary', 'progressive'] },
+	];
+
+	MyProcessDialog.prototype.initialize = function () {
+		MyProcessDialog.super.prototype.initialize.apply( this, arguments );
+		this.content = new OO.ui.PanelLayout( { padded: true, expanded: false } );
+		newAmikText = new OO.ui.MultilineTextInputWidget( {
+		rows: 4,
+		value: amikText,
+		} )
+		this.previewNewText= new OO.ui.ButtonWidget( { label: 'پیش‌نمایش', action:"preview" } );
+		var previewField = new OO.ui.LabelWidget( { label: new OO.ui.HtmlSnippet( 'در حال دریافت پیش‌نمایش' )} )
+		previewField.$element[0].style="margin:10px; border:dotted;margin-top:3px; padding:5px; "
+		this.previewNewText.on("click", function(){
+			previewField.setLabel( 'در حال دریافت پیش‌نمایش' );
+			getWikitextPreview(newAmikText.value, previewField)
+		});
+		var warn01 = '<div>«…» در ابتدای آمیک و «؟» در انتهای آن فراموش نشود!<div>'
+		
+		var amikTextOp_ = []
+		for(i=0;i<amikTextOp.length;i++){
+			amikTextOp_.push(new OO.ui.MenuOptionWidget( { data: amikTextOp[i].substring(10), label:amikTextOp[i].substring(10) } ))
+		}
+		
+		
+		var proposedOptions = new OO.ui.ButtonMenuSelectWidget( {
+			icon: 'menu',
+			label: 'گزینه‌های پیشنهادشده',
+		menu: {
+			items: amikTextOp_
+		}
+		} )
+		//proposedOptions.on("click", function(){newAmikText.setValue( "454" )})
+		proposedOptions.getMenu().on('choose', function(menuOption) {newAmikText.setValue(menuOption.data) })
+		
+		this.content.$element.append( newAmikText.$element, this.previewNewText.$element, proposedOptions.$element );	
+		this.$body.append( this.content.$element, previewField.$element,warn01 );
+		getWikitextPreview(amikText, previewField)
+	};
+	
+	
+	
+	MyProcessDialog.prototype.getBodyHeight = function () {				return 400;}
+	
+	
+	MyProcessDialog.prototype.getActionProcess = function ( action ) {
+		var dialog = this;
+		if ( action ) {
+			return new OO.ui.Process( function () {
+				amikText = newAmikText.value
+				console.log(amikText)
+				processSucessClose(amikText,amikWeekURL,msgBox,header,amikYear,amikWeek_,currentBox,progressBar)
+				dialog.close( { action: action } );
+			} );
+		}
+		return MyProcessDialog.super.prototype.getActionProcess.call( this, action );
+	};
+
+	var windowManager = new OO.ui.WindowManager();
+	$( document.body ).append( windowManager.$element );
+
+	var dialog = new MyProcessDialog();
+	windowManager.addWindows( [ dialog ] );
+	windowManager.openWindow( dialog );
+}
+
+function processSucessClose(amikText,amikWeekURL,msgBox,header,amikYear,amikWeek_,currentBox,progressBar){
+									// if weekly template exists
+var api = new mw.Api();									
+								api.get( {action: 'parse',prop: 'wikitext', format: 'json', page: amikWeekURL} ).done( function ( data ) {
+									msgBox.setLabel('الگوی هفته مورد نظر دریافت شد. در حال افزودن آمیک ...');
+									if(getWiki(data,msgBox,header).includes("… <!-- متن آمیک -->؟")){
+										// see if there is a place
+										var wikitext = getWiki(data,msgBox,header).replace("… <!-- متن آمیک -->؟",amikText)
+										var editSummary = "افزودن آمیک [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"]] به الگوی هفتگی ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
+										var pageName =amikWeekURL
+										api.postWithEditToken({action: 'edit', 
+										//title: pageName,
+										title:'کاربر:Nightdevil/ی',
+										text: wikitext,minor: false, summary: editSummary
+											}).done(function(result) {
+											msgBox.setLabel("الگوی هفته با موفقیت ذخیره شد. در حال افزودن الگوی {{تاریخچه مقاله}} آمیک به بحث مقاله.")
+											talkTemplate(header,amikText,amikYear,amikWeek_,msgBox, currentBox, progressBar)
+											}).fail(function(){msgBox.setLabel("خطا در ذخیره کردن الگوی هفته. عملیات متوقف شد.")})
+									}else{
+										msgBox.setLabel("الگوی هفتهٔ انتخاب‌شده ("+amikWeekURL+") جای خالی ندارد. هفته‌ای دیگر را انتخاب کنید.");
+										msgBox.setType("error");
+										msgBox.setIcon("alert");
+										var jjjjj = new OO.ui.ButtonWidget( {
+											icon: "back",
+											label: "بازگشت",
+											flags: ['destructive']
+										});
+										jjjjj.on("click", function() {
+										msgBox.$element.remove();
+										progressBar.$element.remove();
+										$(currentBox).append(topLayout.$element)
+										msgBox.$element.remove();
+										progressBar.$element.remove();
+										jjjjj.$element.remove();
+										});
+										$(currentBox).append(jjjjj.$element)				
+									}
+								//	console.log(getWiki(data,msgBox,header))
+								}).fail(function(error){
+								//create weekly page
+									msgBox.setLabel('الگوی هفته مورد نظر هنوز ساخته نشده است. در حال ساخت صفحه ...');
+									api.get( {action: 'parse',prop: 'wikitext', format: 'json', page:"ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌بارگذاری الگوی هفتگی"} ).done( function ( data ) {
+									var wikitext = getWiki(data,msgBox,header).replace("… <!-- متن آمیک -->؟",amikText)
+									api.postWithEditToken({action: 'edit', 
+									//title: amikWeekURL,
+									title:'کاربر:Nightdevil/ب',
+									text: wikitext,minor: false, summary: "افزودن آمیک [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"]] به الگوی هفتگی ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
+											}).done(function(result) {
+											msgBox.setLabel("الگوی هفته با موفقیت ایجاد شد. در حال افزودن الگوی {{تاریخچه مقاله}} آمیک به بحث مقاله.")
+											talkTemplate(header,amikText,amikYear,amikWeek_,msgBox, currentBox, progressBar)
+											}).fail(function(){msgBox.setLabel("خطا در ذخیره کردن الگوی هفته. عملیات متوقف شد.")})
+									})
+									});
+	
+	
+	
+}
+
 	function talkTemplate(header,amikText,amikYear,amikWeek_,msgBox, currentBox, progressBar){
 			var api = new mw.Api();
 				api.get( {action: 'parse',prop: 'wikitext', format: 'json', page: "بحث:"+header, section:0} ).done( function ( data ) {
@@ -121,8 +264,6 @@
 					});
 			this.submitArch.on("click", function() {
 				
-	//			myDialog.$element.remove()
-				myDialog.pBox.value
 				if(myDialog.pBox.value==""){
 					myDialog.label1.setLabel("باید شمارهٔ بایگانی را مشخص کنید.")
 				}else{
@@ -421,57 +562,11 @@
 						var api = new mw.Api();
 							api.get( {action: 'parse',prop: 'wikitext', format: 'json', page: "ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header} ).done( function ( data ) {
 								var amikText = getWiki(data,msgBox,header).match(/\{\{گفتاورد\|(.*?)؟/)[0].substring(10)
-								// if weekly template exists	
-								api.get( {action: 'parse',prop: 'wikitext', format: 'json', page: amikWeekURL} ).done( function ( data ) {
-									msgBox.setLabel('الگوی هفته مورد نظر دریافت شد. در حال افزودن آمیک ...');
-									if(getWiki(data,msgBox,header).includes("… <!-- متن آمیک -->؟")){
-										// see if there is a place
-										var wikitext = getWiki(data,msgBox,header).replace("… <!-- متن آمیک -->؟",amikText)
-										var editSummary = "افزودن آمیک [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"]] به الگوی هفتگی ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
-										var pageName =amikWeekURL
-										api.postWithEditToken({action: 'edit', 
-										//title: pageName,
-										title:'کاربر:Nightdevil/ی',
-										text: wikitext,minor: false, summary: editSummary
-											}).done(function(result) {
-											msgBox.setLabel("الگوی هفته با موفقیت ذخیره شد. در حال افزودن الگوی {{تاریخچه مقاله}} آمیک به بحث مقاله.")
-											talkTemplate(header,amikText,amikYear,amikWeek_,msgBox, currentBox, progressBar)
-											}).fail(function(){msgBox.setLabel("خطا در ذخیره کردن الگوی هفته. عملیات متوقف شد.")})
-									}else{
-										msgBox.setLabel("الگوی هفتهٔ انتخاب‌شده ("+amikWeekURL+") جای خالی ندارد. هفته‌ای دیگر را انتخاب کنید.");
-										msgBox.setType("error");
-										msgBox.setIcon("alert");
-										var jjjjj = new OO.ui.ButtonWidget( {
-											icon: "back",
-											label: "بازگشت",
-											flags: ['destructive']
-										});
-										jjjjj.on("click", function() {
-										msgBox.$element.remove();
-										progressBar.$element.remove();
-										$(currentBox).append(topLayout.$element)
-										msgBox.$element.remove();
-										progressBar.$element.remove();
-										jjjjj.$element.remove();
-										});
-										$(currentBox).append(jjjjj.$element)				
-									}
-								//	console.log(getWiki(data,msgBox,header))
-								}).fail(function(error){
-								//create weekly page
-									msgBox.setLabel('الگوی هفته مورد نظر هنوز ساخته نشده است. در حال ساخت صفحه ...');
-									api.get( {action: 'parse',prop: 'wikitext', format: 'json', page:"ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌بارگذاری الگوی هفتگی"} ).done( function ( data ) {
-									var wikitext = getWiki(data,msgBox,header).replace("… <!-- متن آمیک -->؟",amikText)
-									api.postWithEditToken({action: 'edit', 
-									//title: amikWeekURL,
-									title:'کاربر:Nightdevil/ب',
-									text: wikitext,minor: false, summary: "افزودن آمیک [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"]] به الگوی هفتگی ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
-											}).done(function(result) {
-											msgBox.setLabel("الگوی هفته با موفقیت ایجاد شد. در حال افزودن الگوی {{تاریخچه مقاله}} آمیک به بحث مقاله.")
-											talkTemplate(header,amikText,amikYear,amikWeek_,msgBox, currentBox, progressBar)
-											}).fail(function(){msgBox.setLabel("خطا در ذخیره کردن الگوی هفته. عملیات متوقف شد.")})
-									})
-									});
+								var amikTextOp = getWiki(data,msgBox,header).match(/\{\{گفتاورد\|(.*?)؟/g)
+								editFinalText(amikText,amikWeekURL,msgBox,header,amikYear,amikWeek_,currentBox,progressBar, amikTextOp)
+								
+
+							
 							}).fail(function(error){
 								msgBox.setLabel("خطا در خواندن [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header+"]]. ممکن است عنوان آمیک پیشنهادی در صفحه پیش‌نویس اشتباه وارد شده باشد و باید دستی جمع‌بندی شود.")
 								console.log("failed")});
