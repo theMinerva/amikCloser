@@ -75,7 +75,7 @@ function editFinalText(amikText, amikWeekURL, msgBox, header, amikYear, amikWeek
 		if(amikImage){
 			getWikitextPreview("[[پرونده:"+amikImage+"|75px||بی‌قاب]]", imagePreview);
 			var labelText= "<span style='margin-right: 10px; font-style: italic;'> &lt; تصویر آمیک: <small>"+amikImage+"</small></span>";
-			this.$body.append(labelText)
+			this.$body.append(labelText);
 		}else{imagePreview.setLabel(new OO.ui.HtmlSnippet("<div style='margin-right: 10px;margin-top: 30px; font-style: italic;'>برای آمیک «"+header+"» تصویری یافت نشد.</div>"));}
 		
 		getWikitextPreview(amikText, previewField);
@@ -88,7 +88,6 @@ function editFinalText(amikText, amikWeekURL, msgBox, header, amikYear, amikWeek
 		if(action) {
 			return new OO.ui.Process(function() {
 				amikText = newAmikText.value;
-				console.log(amikText);
 				processSucessClose(amikText, amikWeekURL, msgBox, header, amikYear, amikWeek_, currentBox, progressBar, topLayout, amikImage);
 				dialog.close({
 					action: action
@@ -132,18 +131,18 @@ function goBack(msgBox, amikWeekURL, progressBar, currentBox, topLayout, pic){
 $(currentBox).append(goBackButton.$element);
 }
 
-function saveAmikToWeek(amikText, amikImage, num){
+function saveAmikToWeek(data, amikText, amikImage, num){
 	if(num==1|num==2|num==3){
-		var wikitext = getWiki(data, msgBox, header).replace("مورد"+toFA(num)+"=* … <!-- متن آمیک -->؟", "مورد"+toFA(num)+"=* "+amikText).replace("تصویر"+toFA(num)+"=","تصویر"+toFA(num)+"="+amikImage);
+		var wikitext = getWiki(data, msgBox, header).replace("مورد"+toFa(num)+"=* … <!-- متن آمیک -->؟", "مورد"+toFa(num)+"=* "+amikText).replace("تصویر"+toFa(num)+"=","تصویر"+toFa(num)+"="+amikImage);
 	}else{
-		var wikitext = getWiki(data, msgBox, header).replace("مورد"+toFA(num)+"=* … <!-- متن آمیک -->؟", "مورد"+toFA(num)+"=* "+amikText);
+		var wikitext = getWiki(data, msgBox, header).replace("مورد"+toFa(num)+"=* … <!-- متن آمیک -->؟", "مورد"+toFa(num)+"=* "+amikText);
 	}
 	var editSummary = "افزودن آمیک [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/" + header + "]] به الگوی هفتگی ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])";
 	var pageName = amikWeekURL;
 	api.postWithEditToken({
 	action: 'edit',
-	//title: pageName,
-	title: 'کاربر:Nightdevil/ی',
+	title: pageName,
+	//title: 'کاربر:Nightdevil/ی',
 	text: wikitext,
 	minor: false,
 	summary: editSummary
@@ -167,30 +166,30 @@ api.get({action: "parse",prop: "wikitext",format: "json",page: amikWeekURL
 	if(amikImage){
 		//pictured- does the page have 1st pictured slot empty
 		if(getWiki(data, msgBox, header).includes("مورد۱=* … <!-- متن آمیک -->؟")){
-			saveAmikToWeek(amikText, amikImage, 1)
+			saveAmikToWeek(data, amikText, amikImage, 1);
 		//pictured- does the page have 2nd pictured slot empty
 		}else if(getWiki(data, msgBox, header).includes("مورد۲=* … <!-- متن آمیک -->؟")){
-			saveAmikToWeek(amikText, amikImage, 2)
+			saveAmikToWeek(data, amikText, amikImage, 2);
 		//pictured- does the page have 3rd pictured slot empty
 		}else if(getWiki(data, msgBox, header).includes("مورد۳=* … <!-- متن آمیک -->؟")){
-			saveAmikToWeek(amikText, amikImage, 3)
+			saveAmikToWeek(data, amikText, amikImage, 3);
 		//no pictured slots empty, go back
 		}else{
-		goBack(msgBox, amikWeekURL, progressBar, currentBox, topLayout, true)
+		goBack(msgBox, amikWeekURL, progressBar, currentBox, topLayout, true);
 		}
 	}else{//non-pictured
 		//non-pictured- does the page have 4th slot empty
 		if(getWiki(data, msgBox, header).includes("مورد۴=* … <!-- متن آمیک -->؟")){
-			saveAmikToWeek(amikText, amikImage, 4)
+			saveAmikToWeek(data, amikText, amikImage, 4);
 		//non-pictured- does the page have 5th slot empty
 		}else if(getWiki(data, msgBox, header).includes("مورد۵=* … <!-- متن آمیک -->؟")){
-			saveAmikToWeek(amikText, amikImage, 5)
+			saveAmikToWeek(data, amikText, amikImage, 5);
 		//non-pictured- does the page have 6th slot empty
 		}else if(getWiki(data, msgBox, header).includes("مورد۶=* … <!-- متن آمیک -->؟")){
-			saveAmikToWeek(amikText, amikImage, 6)
+			saveAmikToWeek(data, amikText, amikImage, 6);
 		//no pictured slots empty, go back
 		}else{
-		goBack(msgBox, amikWeekURL, progressBar, currentBox, topLayout, false)
+		goBack(msgBox, amikWeekURL, progressBar, currentBox, topLayout, false);
 		}
 	}
 
@@ -210,8 +209,8 @@ api.get({action: "parse",prop: "wikitext",format: "json",page: amikWeekURL
 	}
 	api.postWithEditToken({
 		action: 'edit',
-		//title: amikWeekURL,
-		title: 'کاربر:Nightdevil/ب',
+		title: amikWeekURL,
+		//title: 'کاربر:Nightdevil/ب',
 		text: wikitext,
 		minor: false,
 		summary: "افزودن آمیک [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/" + header + "]] به الگوی هفتگی ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
@@ -240,10 +239,11 @@ function talkTemplate(header, amikText, amikYear, amikWeek_, msgBox, currentBox,
 		var wikitext = getWiki(data, msgBox, header) + "{{تاریخچه مقاله| dykdate = " + amikYear.value + "0100+" + amikWeek_ + "weeks| dykentry = " + amikText + "| dyklink = ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/" + header + "}}";
 		api.postWithEditToken({
 			action: 'edit',
-			//title: "بحث:"+header,
-			title: 'کاربر:Nightdevil/ر',
+			title: "بحث:"+header,
+			//title: 'کاربر:Nightdevil/ر',
 			text: wikitext,
 			minor: false,
+			section: 0,
 			summary: "افزودن الگوی تاریخچهٔ آمیک به بحث مقالهٔ [[" + header + "]] ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
 		}).done(function(result) {
 			msgBox.setLabel("الگوی تاریخچه با موفقیت به بحث مقاله افزوده شد. در حال افزودن الگوی {{بسته}} آمیک به این گفتگو.");
@@ -256,8 +256,8 @@ function talkTemplate(header, amikText, amikYear, amikWeek_, msgBox, currentBox,
 		var wikitext = "{{رتب}}{{بصب}}{{تاریخچه مقاله| dykdate = " + amikYear.value + "0100+" + amikWeek_ + "weeks| dykentry = " + amikText + "| dyklink = ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/" + header + "}}";
 		api.postWithEditToken({
 			action: 'edit',
-			//title: "بحث:"+header,
-			title: 'کاربر:Nightdevil/ز',
+			title: "بحث:"+header,
+			//title: 'کاربر:Nightdevil/ز',
 			text: wikitext,
 			minor: false,
 			summary: "افزودن الگوی تاریخچهٔ آمیک و ایجاد صفحهٔ بحث مقالهٔ [[" + header + "]] ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
@@ -281,8 +281,8 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 		var wikitext = getWiki(data, msgBox, header).replace(/(\=\=.+?=\=)/s, "$1\n{{بسته}}\n{{شد}} ~~" + "~~").replace("| هفته =", "| هفته =" + amikWeek_).replace("| سال =", "| سال =" + amikYear.value) + "{{پایان بسته}}";
 		api.postWithEditToken({
 			action: 'edit',
-			//title: "ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header,
-			title: 'کاربر:Nightdevil/ذ',
+			title: "ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header,
+			//title: 'کاربر:Nightdevil/ذ',
 			text: wikitext,
 			minor: false,
 			summary: "جمع‌بندی موفقانهٔ [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/" + header + "]] ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
@@ -303,12 +303,12 @@ function closeSuccess(header, msgBox, currentBox, amikYear, amikWeek_, progressB
 }
 
 function closeFailSuccess(header, msgBox, currentBox, progressBar, jamReason) {
-	msgBox.setLabel("جمع‌بندی ناموفق (" + jamReason.value + ") موفقانه انجام شد." + header)
+	msgBox.setLabel("جمع‌بندی ناموفق (" + jamReason.value + ") موفقانه انجام شد." + header);
 	msgBox.setIcon("check");
 	msgBox.setType("success");
 	progressBar.$element.remove();
 	currentBox.innerHTML += '<p>صفحهٔ <a href="https://fa.wikipedia.org/wiki/ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/' + header + '">گفتگوی پیش&zwnj;نویس آمیک</a> بسته شد.</p><div></div>';
-	currentRow = currentBox.children[2]
+	currentRow = currentBox.children[2];
 }
 
 function addArchiveButtons_(currentBox, header, isSoft) {
@@ -338,31 +338,31 @@ function addArchiveButtons_(currentBox, header, isSoft) {
 				data: "h",
 				label: "2"
 			}];
-			var pagePref
+			var pagePref;
 			if(isSoft == false) {
-				pagePref = "ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/بایگانی "
+				pagePref = "ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/بایگانی ";
 			} else {
-				pagePref = 'ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/جمع‌بندی‌های نرم/بایگانی '
+				pagePref = 'ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/جمع‌بندی‌های نرم/بایگانی ';
 			}
 			if(isSoft == false) {
 				for(i = 0; i < archsTemp.length; i++) {
 					pArr.push({
 						data: archsTemp[i]['title'],
 						label: pagePref + toFa(archsTemp[i]['title'])
-					})
+					});
 				}
 			} else {
 				for(i = 0; i < archsSofts.length; i++) {
 					pArr.push({
 						data: archsSofts[i]['title'],
 						label: pagePref + toFa(archsSofts[i]['title'])
-					})
+					});
 				}
 			}
 			this.label0 = new OO.ui.LabelWidget({
 				label: 'شمارهٔ بایگانی مورد نظر را انتخاب کنید یا شمارهٔ جدیدی وارد کنید'
-			})
-			var removeP = pArr.shift()
+			});
+			var removeP = pArr.shift();
 			this.pBox = new OO.ui.ComboBoxInputWidget({
 				options: pArr,
 				label: ":",
@@ -370,22 +370,22 @@ function addArchiveButtons_(currentBox, header, isSoft) {
 				maxLength: 3,
 				value: pArr[0]['data'],
 				dir: "rtl"
-			})
-			this.pBox.$element[0].style = 'direction:"rtl"'
-			this.pBox.$element[0].childNodes[3].childNodes[0].style = 'text-align:center'
+			});
+			this.pBox.$element[0].style = 'direction:"rtl"';
+			this.pBox.$element[0].childNodes[3].childNodes[0].style = 'text-align:center';
 			this.submitArch = new OO.ui.ButtonWidget({
 				label: "ارسال «" + header.slice(0, 20) + "» به بایگانی انتخاب‌شده",
 				flags: ['progressive']
 			});
 			this.submitArch.on("click", function() {
 				if(myDialog.pBox.value == "") {
-					myDialog.label1.setLabel("باید شمارهٔ بایگانی را مشخص کنید.")
+					myDialog.label1.setLabel("باید شمارهٔ بایگانی را مشخص کنید.");
 				} else {
-					var archNum = myDialog.pBox.value
-					myDialog.label1.setLabel("در حال دریافت " + pagePref + toFa(archNum))
-					myDialog.label0.$element.remove()
-					myDialog.pBox.$element.remove()
-					myDialog.submitArch.$element.remove()
+					var archNum = myDialog.pBox.value;
+					myDialog.label1.setLabel("در حال دریافت " + pagePref + toFa(archNum));
+					myDialog.label0.$element.remove();
+					myDialog.pBox.$element.remove();
+					myDialog.submitArch.$element.remove();
 					this.progressBar = new OO.ui.ProgressBarWidget({
 						progress: false
 					});
@@ -396,70 +396,70 @@ function addArchiveButtons_(currentBox, header, isSoft) {
 						prop: "wikitext",
 						format: "json"
 					}).done(function(data) {
-						myDialog.label1.setLabel("بایگانی دریافت شد. در حال افزودن مبحث آمیک و ذخیره صفحه " + toFa(archNum))
+						myDialog.label1.setLabel("بایگانی دریافت شد. در حال افزودن مبحث آمیک و ذخیره صفحه " + toFa(archNum));
 						var preText = data.parse.wikitext['*'];
-						archiveTransfer(preText)
+						archiveTransfer(preText);
 					}).fail(function() {
-						myDialog.label1.setLabel("این صفحه وجود ندارد. در حال ایجاد ‌‌ " + pagePref + toFa(archNum))
+						myDialog.label1.setLabel("این صفحه وجود ندارد. در حال ایجاد ‌‌ " + pagePref + toFa(archNum));
 						var preText = "{{Archive navigation|" + archNum + "}}";
-						archiveTransfer(preText)
-					})
+						archiveTransfer(preText);
+					});
 
 					function archiveTransfer(preText) {
 						api.postWithEditToken({
 							action: 'edit',
-							//title:pagePref+toFa(archNum),
-							title: 'کاربر:Nightdevil/د',
+							title:pagePref+toFa(archNum),
+							//title: 'کاربر:Nightdevil/د',
 							text: preText + "\n{{ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/" + header + "}}",
 							summary: "بایگانی پیش‌نویس آمیک [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/" + header + "]] ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
 						}).done(function() {
-							myDialog.label1.setLabel("صفحه بایگانی ذخیره شد. در حال حذف زیرصفحه از صفحهٔ پیش‌نویس وپ:پامیک")
+							myDialog.label1.setLabel("صفحه بایگانی ذخیره شد. در حال حذف زیرصفحه از صفحهٔ پیش‌نویس وپ:پامیک");
 							api.get({
 								action: 'parse',
 								page: 'ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس',
 								format: 'json',
 								prop: 'wikitext'
 							}).done(function(data) {
-								var newText = data.parse.wikitext['*'].replace("{{ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/" + header + "}}", "")
+								var newText = data.parse.wikitext['*'].replace("{{ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/" + header + "}}", "");
 								api.postWithEditToken({
 									action: 'edit',
-									//title:'ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس',
-									title: 'کاربر:Nightdevil/پ',
+									title:'ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس',
+									//title: 'کاربر:Nightdevil/پ',
 									text: newText,
 									summary: "بایگانی پیش‌نویس آمیک [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/" + header + "]] در [[" + pagePref + toFa(archNum) + "]] ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
 								}).done(function() {
-									myDialog.label1.setLabel("صفحهٔ پیش‌نویس آمیک بایگانی شد. برای بستن این دیالوگ روی دکمهٔ ادامه کلیک کنید.")
+									myDialog.label1.setLabel("صفحهٔ پیش‌نویس آمیک بایگانی شد. برای بستن این دیالوگ روی دکمهٔ ادامه کلیک کنید.");
 									this.clDiag = new OO.ui.ButtonWidget({
 										label: "ادامه",
 										flags: ['progressive']
 									});
 									this.clDiag.on("click", function() {
 										myDialog.close();
-									})
-									window.progressBar.$element.remove()
+									});
+									window.progressBar.$element.remove();
 										//remove section from view
 									if(currentBox.parentElement.parentElement.tagName == "div") {
-										currentBox.parentElement.parentElement.innerHTML = "<div style='text-align: center; height: 100px; background-color: white; padding: 100px;'>آمیک " + header + " به بایگانی <a href='http://fa.wikipedia.org/wiki/ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/بایگانی " + toFa(archNum) + "'>ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/بایگانی " + toFa(archNum) + "</a> منتقل شد.</div>"
+										currentBox.parentElement.parentElement.innerHTML = "<div style='text-align: center; height: 100px; background-color: white; padding: 100px;'>آمیک " + header + " به بایگانی <a href='http://fa.wikipedia.org/wiki/ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/بایگانی " + toFa(archNum) + "'>ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/بایگانی " + toFa(archNum) + "</a> منتقل شد.</div>";
 									} else {
-										currentBox.parentElement.innerHTML = "<div style='text-align: center; height: 100px; background-color: white; padding: 100px;'>آمیک " + header + " به بایگانی <a href='http://fa.wikipedia.org/wiki/" + pagePref + toFa(archNum) + "'>" + pagePref + toFa(archNum) + "</a> منتقل شد.</div>"
+										currentBox.parentElement.innerHTML = "<div style='text-align: center; height: 100px; background-color: white; padding: 100px;'>آمیک " + header + " به بایگانی <a href='http://fa.wikipedia.org/wiki/" + pagePref + toFa(archNum) + "'>" + pagePref + toFa(archNum) + "</a> منتقل شد.</div>";
 									}
-									clDiag.$element.style = "width:300"
+									clDiag.$element.style = "width:300";
 									myDialog.$body.append(this.clDiag.$element);
 								}).fail(function() {
-									myDialog.label1.setLabel("خطا در ذخیره وپ:پامیک.")
-								})
+									myDialog.label1.setLabel("خطا در ذخیره وپ:پامیک.");
+								});
 							}).fail(function() {
-								myDialog.label1.setLabel("خطا در دریافت صفحهٔ وپ:پامیک از سرور.")
-							})
+								myDialog.label1.setLabel("خطا در دریافت صفحهٔ وپ:پامیک از سرور.");
+							});
 						}).fail(function() {
-							myDialog.label1.setLabel("خطا در ذخیره‌سازی صفحه.")
-						})
+							myDialog.label1.setLabel("خطا در ذخیره‌سازی صفحه.");
+						});
 					}
 				}
 			});
 			this.label1 = new OO.ui.LabelWidget({
 				label: ''
-			})
+			});
 			dBody = document.getElementsByClassName("oo-ui-window-body");
 			//dBody[0].children[0].children[0].innerHTML=""
 			//dBody[0].children[0].children[0].append(pBox.$element[0],submitArch.$element[0],label1.$element[0])
@@ -480,8 +480,8 @@ function addArchiveButtons_(currentBox, header, isSoft) {
 			escapable: false
 		});
 		myDialog.on("close", function() {
-				console.log("closer")
-			})
+				console.log("closer");
+			});
 			// Create and append a window manager, which opens and closes the window.
 		var windowManager = new OO.ui.WindowManager();
 		$(document.body).append(windowManager.$element);
@@ -490,7 +490,7 @@ function addArchiveButtons_(currentBox, header, isSoft) {
 		windowManager.openWindow(myDialog);
 	});
 	//$(currentRow)[0].textContent ="";
-	$(currentBox).append(archiveHardB.$element)
+	$(currentBox).append(archiveHardB.$element);
 }
 
 function getWiki(data, msgBox, header) {
@@ -499,7 +499,7 @@ function getWiki(data, msgBox, header) {
 		let firstKey = Object.keys(pages);
 		return pages[firstKey];
 	} catch(e) {
-		msgBox.setLabel("خطا در خواندن [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/" + header + "]]. ممکن است عنوان آمیک پیشنهادی در صفحه پیش‌نویس اشتباه وارد شده باشد و باید دستی جمع‌بندی شود.")
+		msgBox.setLabel("خطا در خواندن [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/" + header + "]]. ممکن است عنوان آمیک پیشنهادی در صفحه پیش‌نویس اشتباه وارد شده باشد و باید دستی جمع‌بندی شود.");
 	}
 }
 
@@ -507,8 +507,8 @@ function postEdit_(wikitext, editSummary, pageName, header, msgBox, currentBox, 
 	var api = new mw.Api();
 	api.postWithEditToken({
 		action: 'edit',
-		//title: pageName,
-		title: 'کاربر:Nightdevil/ش',
+		title: pageName,
+		//title: 'کاربر:Nightdevil/ش',
 		text: wikitext,
 		minor: false,
 		summary: editSummary
@@ -529,7 +529,7 @@ function failClose(currentRow, header, jamReason) {
 			var progressBar = new OO.ui.ProgressBarWidget({
 				progress: false
 			});
-			var currentBox = currentRow.parentElement.parentElement
+			var currentBox = currentRow.parentElement.parentElement;
 			currentBox.innerHTML = "";
 			$(currentBox).append(progressBar.$element);
 			$(currentBox).append(msgBox.$element);
@@ -542,23 +542,23 @@ function failClose(currentRow, header, jamReason) {
 					prop: "wikitext",
 					format: "json"
 				}).done(function(data) {
-					wikiText = data.parse.wikitext['*'].replace(/(\=\=.+?=\=)/s, "$1\n<small> </small>\n") + "{{جا:جمع‌بندی نرم پامیک}}";
-					msgBox.setLabel('الگوی جمع‌بندی نرم پامیک تراگنجانیده شد. در حال ذخیرهٔ صفحهٔ پیش‌نویس ' + header)
+					var wikiText = data.parse.wikitext['*'].replace(/(\=\=.+?=\=)/s, "$1\n<small> </small>\n") + "{{جا"+":جمع‌بندی نرم پامیک}}";
+					msgBox.setLabel('الگوی جمع‌بندی نرم پامیک تراگنجانیده شد. در حال ذخیرهٔ صفحهٔ پیش‌نویس ' + header);
 					api.postWithEditToken({
 						action: "edit",
-						//title:"ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header,
-						title: 'کاربر:Nightdevil/س',
+						title:"ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/"+header,
+						//title: 'کاربر:Nightdevil/س',
 						text: wikiText,
 						summary: "جمع‌بندی ناموفق [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/" + header + "]] (" + jamReason.value + ") ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
 					}).done(function() {
-						closeFailSuccess(header, msgBox, currentBox, progressBar, jamReason)
+						closeFailSuccess(header, msgBox, currentBox, progressBar, jamReason);
 						addArchiveButtons_(currentBox, header, true);
 					}).fail(function() {
-						msgBox.setLabel('خطا در ارتباط با سرور')
-					})
+						msgBox.setLabel('خطا در ارتباط با سرور');
+					});
 				}).fail(function() {
-					msgBox.setLabel('خطا در دریافت اطلاعات صفحه پیش‌نویس آمیک')
-				})
+					msgBox.setLabel('خطا در دریافت اطلاعات صفحه پیش‌نویس آمیک');
+				});
 			} else {
 				//hard close fail
 				$.ajax({
@@ -566,13 +566,13 @@ function failClose(currentRow, header, jamReason) {
 					success: function(data) {
 						var wikitext = getWiki(data, msgBox, header).replace(/(\=\=.+?=\=)/s, "$1\n{{بسته|ناموفق=بله}}\n" + jamReason.value + "  ~~" + "~~") + "{{پایان بسته}}"
 							//console.log(q2)
-						var editSummary = "جمع‌بندی ناموفق [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/" + header + "]] (" + jamReason.value + ") ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])"
-						var pageName = "ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/" + header
-						msgBox.setLabel('در حال پردازش درخواست — در حال ارسال اطلاعات به سرور')
+						var editSummary = "جمع‌بندی ناموفق [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/" + header + "]] (" + jamReason.value + ") ([[وپ:اجآ|ابزار جمع‌بندی آمیک]])";
+						var pageName = "ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/" + header;
+						msgBox.setLabel('در حال پردازش درخواست — در حال ارسال اطلاعات به سرور');
 						postEdit_(wikitext, editSummary, pageName, header, msgBox, currentBox, progressBar, jamReason);
 					},
 					error: function(xhr, error) {
-						msgBox.setLabel('خطا در ارتباط با سرور')
+						msgBox.setLabel('خطا در ارتباط با سرور');
 						console.log(xhr);
 						console.log(error);
 					}
@@ -581,13 +581,13 @@ function failClose(currentRow, header, jamReason) {
 		} else {
 			console.log('User clicked "Cancel" or closed the dialog.');
 		}
-	})
+	});
 }
 
 function addButtons_(currentRow, header) {
 	//  var header = currentRow.parentElement.parentElement.parentElement.parentElement.children[0].children[1].id
 	//  console.log(header)
-	var currentBox = currentRow.parentElement.parentElement
+	var currentBox = currentRow.parentElement.parentElement;
 		//دکمه جمع‌بندی
 	var jamBandiB = new OO.ui.ButtonWidget({
 		icon: "expand",
@@ -608,7 +608,7 @@ function addButtons_(currentRow, header) {
 		}
 	});
 	$(currentRow)[0].textContent = "";
-	$(currentRow).append(jamBandiB.$element)
+	$(currentRow).append(jamBandiB.$element);
 		//نوار قالبش
 	$(currentRow).append('<tr><td colspan="2"><div style="display: flex; justify-content: center;"></div></td></tr><tr style="display:none;"><td colspan=2 style="padding-bottom:10px; text-align:center"><div style="display: flex; justify-content: center;"></div></td></tr>');
 	//دراپ‌داون انتخاب سال
@@ -627,7 +627,7 @@ function addButtons_(currentRow, header) {
 		align: 'right'
 	});
 	//ورود هفته
-	var currentTime = new Date()
+	var currentTime = new Date();
 
 	function week(year, month, day) {
 		function serial(days) {
@@ -649,7 +649,7 @@ function addButtons_(currentRow, header) {
 			date2 = dateserial(yearserial(date - serial(weekday(date - serial(1))) + serial(4)), 1, 3);
 		return ~~((date - date2 + serial(weekday(date2) + 5)) / serial(7));
 	}
-	week(currentTime.getFullYear(), currentTime.getMonth() + 1, currentTime.getDate())
+	week(currentTime.getFullYear(), currentTime.getMonth() + 1, currentTime.getDate());
 	var amikWeek = new OO.ui.NumberInputWidget({
 		align: 'left',
 		input: {
@@ -683,8 +683,8 @@ function addButtons_(currentRow, header) {
 					$(currentBox).append(progressBar.$element);
 					$(currentBox).append(msgBox.$element);
 					//
-					var amikWeek_ = amikWeek.value.replace(/1/g, "۱").replace(/2/g, "۲").replace(/3/g, "۳").replace(/4/g, "۴").replace(/5/g, "۵").replace(/6/g, "۶").replace(/7/g, "۷").replace(/8/g, "۸").replace(/9/g, "۹").replace(/0/g, "۰")
-					var amikWeekURL = "ویکی‌پدیا:آیا می‌دانستید که...؟/" + amikYear.value + "/هفته " + amikWeek_
+					var amikWeek_ = amikWeek.value.replace(/1/g, "۱").replace(/2/g, "۲").replace(/3/g, "۳").replace(/4/g, "۴").replace(/5/g, "۵").replace(/6/g, "۶").replace(/7/g, "۷").replace(/8/g, "۸").replace(/9/g, "۹").replace(/0/g, "۰");
+					var amikWeekURL = "ویکی‌پدیا:آیا می‌دانستید که...؟/" + amikYear.value + "/هفته " + amikWeek_;
 						//get amikText
 					var api = new mw.Api();
 					api.get({
@@ -698,14 +698,14 @@ function addButtons_(currentRow, header) {
 						if (getWiki(data, msgBox, header).match(/\[\[پرونده:(.*?)\|/)){
 							var amikImage = getWiki(data, msgBox, header).match(/\[\[پرونده:(.*?)\|/)[0].substring(9).slice(0,-1);
 							}else{var amikImage = null;}
-						editFinalText(amikText, amikWeekURL, msgBox, header, amikYear, amikWeek_, currentBox, progressBar, amikTextOp, topLayout, amikImage)
+						editFinalText(amikText, amikWeekURL, msgBox, header, amikYear, amikWeek_, currentBox, progressBar, amikTextOp, topLayout, amikImage);
 					}).fail(function(error) {
-						msgBox.setLabel("خطا در خواندن [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/" + header + "]]. ممکن است عنوان آمیک پیشنهادی در صفحه پیش‌نویس اشتباه وارد شده باشد و باید دستی جمع‌بندی شود.")
-						console.log("failed")
+						msgBox.setLabel("خطا در خواندن [[ویکی‌پدیا:آیا می‌دانستید که...؟/پیش‌نویس/" + header + "]]. ممکن است عنوان آمیک پیشنهادی در صفحه پیش‌نویس اشتباه وارد شده باشد و باید دستی جمع‌بندی شود.");
+						console.log("failed");
 					});
 				}
 			});
-		})
+		});
 		//دراپ‌داون انتخاب سال
 	var jamReason = new OO.ui.DropdownInputWidget({
 		options: [{
@@ -754,23 +754,21 @@ function addButtons_(currentRow, header) {
 }
 
 function toFa(foo) {
-	return foo.toString().replace(/1/g, "۱").replace(/2/g, "۲").replace(/3/g, "۳").replace(/4/g, "۴").replace(/5/g, "۵").replace(/6/g, "۶").replace(/7/g, "۷").replace(/8/g, "۸").replace(/9/g, "۹").replace(/0/g, "۰")
+	return foo.toString().replace(/1/g, "۱").replace(/2/g, "۲").replace(/3/g, "۳").replace(/4/g, "۴").replace(/5/g, "۵").replace(/6/g, "۶").replace(/7/g, "۷").replace(/8/g, "۸").replace(/9/g, "۹").replace(/0/g, "۰");
 }
 
 function toEn(foo) {
-	return foo.toString().replace(/۱/g, 1).replace(/۲/g, 2).replace(/۳/g, 3).replace(/۴/g, 4).replace(/۵/g, 5).replace(/۶/g, 6).replace(/۷/g, 7).replace(/۸/g, 8).replace(/۹/g, 9).replace(/۰/g, 0)
+	return foo.toString().replace(/۱/g, 1).replace(/۲/g, 2).replace(/۳/g, 3).replace(/۴/g, 4).replace(/۵/g, 5).replace(/۶/g, 6).replace(/۷/g, 7).replace(/۸/g, 8).replace(/۹/g, 9).replace(/۰/g, 0);
 }
 
 if(document.title.slice(0, 27) == 'ویکی‌پدیا:آیا می‌دانستید که' || document.title.slice(0, 27) == 'کاربر:Nightdevil/صفحه تمرین') {
-	var amikBoxes = document.getElementsByClassName("infobox")
+	var amikBoxes = document.getElementsByClassName("infobox");
 	if(amikBoxes.length != 0) {
 		mw.loader.using(["oojs-ui-core", "oojs-ui-widgets", "oojs-ui-windows"]).done(function() {
 			mw.loader.load(["oojs-ui.styles.icons-alerts", "oojs-ui.styles.icons-interactions", "oojs-ui.styles.icons-moderation", "oojs-ui.styles.icons-user", "oojs-ui.styles.icons-content", "oojs-ui.styles.icons-editing-core", "oojs-ui.styles.icons-editing-advanced"]);
 			for(var i = 0; i < amikBoxes.length; i++) {
 				var currentBox = amikBoxes[i].children[0]; //تعریف فضای فعلی
 				var header = amikBoxes[i].getElementsByClassName("infobox-header")[0].textContent.replace('بررسی آمیک ', ''); //گرفتن عنوان
-				//var header = amikBoxes[i].previousElementSibling.previousElementSibling.previousElementSibling.children[1].id;
-				//console.log(header)
 				var currentRow = currentBox.children[6].children[0]; //تعریف نوار
 				if(amikBoxes[i].parentElement.children[0].tagName == "SMALL") { //چک کردن اینکه قبلا بسته شده است (hard)
 					var isSoft = false;
@@ -779,7 +777,7 @@ if(document.title.slice(0, 27) == 'ویکی‌پدیا:آیا می‌دانست�
 					addButtons_(currentRow, header); //افزودن دکمه جمع‌بندی
 				}
 			}
-		})
+		});
 	}
 	//get archives list
 	var api = new mw.Api();
@@ -792,7 +790,7 @@ if(document.title.slice(0, 27) == 'ویکی‌پدیا:آیا می‌دانست�
 		aplimit: 'max',
 		apfilterredir: 'nonredirects'
 	}).done(function(data) {
-		console.log("successfully got archive data")
+		console.log("successfully got archive data");
 		var archs = data.query.allpages;
 		archsTemp = data.query.allpages;
 		for(i = 0; i < archs.length; i++) {
