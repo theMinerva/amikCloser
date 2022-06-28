@@ -202,10 +202,10 @@ api.get({action: "parse",prop: "wikitext",format: "json",page: amikWeekURL
 	//is amik pictured or not
 	if(amikImage){//pictured
 		//add to first slot and go to talktemplate
-		var wikitext = getWiki(data, msgBox, header).replace("مورد۱=* … <!-- متن آمیک -->؟", "|مورد۱=* "+amikText);
+		var wikitext = getWiki(data, msgBox, header).replace("مورد۱=* … <!-- متن آمیک -->؟", "مورد۱=* "+amikText);
 	}else{//non-pictured
 		//add to fourth and go to talktemplate
-		var wikitext = getWiki(data, msgBox, header).replace("مورد۴=* … <!-- متن آمیک -->؟", "|مورد۴=* "+amikText);
+		var wikitext = getWiki(data, msgBox, header).replace("مورد۴=* … <!-- متن آمیک -->؟", "مورد۴=* "+amikText);
 	}
 	api.postWithEditToken({
 		action: 'edit',
@@ -697,6 +697,8 @@ function addButtons_(currentRow, header) {
 						var amikTextOp = getWiki(data, msgBox, header).match(/\{\{گفتاورد\|(.*?)؟/g);
 						if (getWiki(data, msgBox, header).match(/\[\[پرونده:(.*?)\|/)){
 							var amikImage = getWiki(data, msgBox, header).match(/\[\[پرونده:(.*?)\|/)[0].substring(9).slice(0,-1);
+						}else if(getWiki(data, msgBox, header).match(/\[\[:پرونده:(.*?)\]/)){
+							var amikImage = getWiki(data, msgBox, header).match(/\[\[:پرونده:(.*?)\]/)[0].substring(10).slice(0,-1);
 							}else{var amikImage = null;}
 						editFinalText(amikText, amikWeekURL, msgBox, header, amikYear, amikWeek_, currentBox, progressBar, amikTextOp, topLayout, amikImage);
 					}).fail(function(error) {
